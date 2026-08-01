@@ -1,0 +1,473 @@
+@import "tailwindcss";
+
+/* ===================================================
+   Academy Design System -- Dark Purple x Pink/Lavender
+   =================================================== */
+
+:root {
+  /* Background */
+  --color-bg-page: #0e0b14;
+  --color-bg-surface: #16121f;
+  --color-bg-elevated: #1e1a29;
+
+  /* Accent */
+  --color-accent-purple: #a78bfa;
+  --color-accent-pink: #f472b6;
+  --color-accent-lavender: #c4b5fd;
+
+  /* Text */
+  --color-text-primary: #f0edf5;
+  --color-text-secondary: #a8a0b8;
+  --color-text-muted: #6b6280;
+
+  /* Border */
+  --color-border: #2a2438;
+  --color-border-focus: #a78bfa;
+
+  /* Status */
+  --color-error: #f87171;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+}
+
+/* ===================================================
+   Base Styles
+   =================================================== */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: "Noto Sans JP", sans-serif;
+  min-height: 100dvh;
+}
+
+/* ===================================================
+   Ambient Background Gradient
+   =================================================== */
+
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(167, 139, 250, 0.08), transparent),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(244, 114, 182, 0.06), transparent);
+  pointer-events: none;
+}
+
+/* ===================================================
+   Form Elements
+   =================================================== */
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form-input:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+}
+
+.form-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-input.has-error {
+  border-color: var(--color-error);
+}
+
+.form-input.has-error:focus {
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+
+/* Select arrow */
+.form-select {
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b6280' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6l3.5 4 3.5-4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+/* Textarea auto-resize helper */
+.form-textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+/* ===================================================
+   Label / Helper
+   =================================================== */
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.375rem;
+}
+
+.badge-required {
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  background-color: rgba(244, 114, 182, 0.2);
+  color: var(--color-accent-pink);
+  letter-spacing: 0.05em;
+}
+
+.badge-optional {
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  background-color: rgba(167, 139, 250, 0.15);
+  color: var(--color-accent-lavender);
+  letter-spacing: 0.05em;
+}
+
+.char-counter {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: right;
+  margin-top: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.char-counter.over-limit {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+/* ===================================================
+   Checkbox
+   =================================================== */
+
+.custom-checkbox {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 44px;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.custom-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.custom-checkbox .checkmark {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0.25rem;
+  background-color: var(--color-bg-surface);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-checkbox input:checked + .checkmark {
+  background-color: var(--color-accent-purple);
+  border-color: var(--color-accent-purple);
+}
+
+.custom-checkbox input:checked + .checkmark::after {
+  content: "";
+  display: block;
+  width: 0.375rem;
+  height: 0.625rem;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+.custom-checkbox input:focus-visible + .checkmark {
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3);
+}
+
+.custom-checkbox .label-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.custom-checkbox .label-text a {
+  color: var(--color-accent-purple);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.custom-checkbox .label-text a:hover {
+  color: var(--color-accent-pink);
+}
+
+/* ===================================================
+   Buttons
+   =================================================== */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0e0b14;
+  background: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 52px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--color-accent-pink), var(--color-accent-purple));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.btn-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(40%);
+}
+
+.btn-primary span {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-accent-lavender);
+  background-color: transparent;
+  border: 1px dashed var(--color-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--color-accent-purple);
+  background-color: rgba(167, 139, 250, 0.08);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 0.375rem;
+  background-color: rgba(248, 113, 113, 0.1);
+  color: var(--color-error);
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.btn-remove:hover {
+  background-color: rgba(248, 113, 113, 0.2);
+}
+
+/* ===================================================
+   Tabs
+   =================================================== */
+
+.tab-container {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  gap: 0;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px;
+  text-align: center;
+}
+
+.tab-button:hover {
+  color: var(--color-text-primary);
+  background-color: rgba(167, 139, 250, 0.05);
+}
+
+.tab-button.active {
+  color: var(--color-accent-purple);
+  border-bottom-color: var(--color-accent-pink);
+}
+
+/* ===================================================
+   Card / Surface
+   =================================================== */
+
+.card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .card-body {
+    padding: 1rem;
+  }
+}
+
+/* ===================================================
+   Section Divider
+   =================================================== */
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.5rem 0;
+}
+
+/* ===================================================
+   Loading Spinner
+   =================================================== */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2.5px solid rgba(14, 11, 20, 0.3);
+  border-top-color: #0e0b14;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ===================================================
+   Animations
+   =================================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.25s ease-out forwards;
+}
+
+/* ===================================================
+   Auto-calculated display
+   =================================================== */
+
+.auto-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-accent-lavender);
+  background-color: rgba(167, 139, 250, 0.08);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 0.5rem;
+  min-height: 44px;
+}
