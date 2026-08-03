@@ -39,6 +39,7 @@ export default function SelectInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
+        aria-required={required}
       >
         <option value="" disabled>
           {placeholder}

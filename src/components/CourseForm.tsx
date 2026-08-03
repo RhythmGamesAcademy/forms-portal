@@ -6,6 +6,7 @@ import TextArea from "./ui/TextArea";
 import SelectInput from "./ui/SelectInput";
 import ListInput from "./ui/ListInput";
 import Checkbox from "./ui/Checkbox";
+import PolicyModal from "./ui/PolicyModal";
 import CoursePngTemplate from "./png/CoursePngTemplate";
 import {
   type CourseFormData,
@@ -20,6 +21,8 @@ import { generatePng, formatDateForFilename } from "@/lib/generatePng";
 export default function CourseForm() {
   const [formData, setFormData] = useState<CourseFormData>(createEmptyCourseForm());
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isLecturerModalOpen, setIsLecturerModalOpen] = useState(false);
   const templateRef = useRef<HTMLDivElement>(null);
 
   // Field change helper
@@ -65,6 +68,7 @@ export default function CourseForm() {
       approach,
       references,
       confirmNoFalsehood,
+      confirmPrivacyPolicy,
       confirmRegulations,
     } = formData;
 
@@ -87,6 +91,7 @@ export default function CourseForm() {
       hasRequiredFields &&
       hasValidGoals &&
       confirmNoFalsehood &&
+      confirmPrivacyPolicy &&
       confirmRegulations
     );
   }, [formData, isSessionValid]);
@@ -251,14 +256,38 @@ export default function CourseForm() {
             申請内容に虚偽はありません
           </Checkbox>
           <Checkbox
+            id="confirm-privacy-course"
+            checked={formData.confirmPrivacyPolicy}
+            onChange={(val) => {
+              if (val) setIsPrivacyModalOpen(true);
+              else updateField("confirmPrivacyPolicy", false);
+            }}
+          >
+            <a 
+              href="#" 
+              onClick={(e) => { e.preventDefault(); setIsPrivacyModalOpen(true); }} 
+              className="text-pink-400 hover:text-pink-300 underline"
+            >
+              プライバシーポリシー
+            </a>
+            に同意します
+          </Checkbox>
+          <Checkbox
             id="confirm-regulations-course"
             checked={formData.confirmRegulations}
-            onChange={(val) => updateField("confirmRegulations", val)}
+            onChange={(val) => {
+              if (val) setIsLecturerModalOpen(true);
+              else updateField("confirmRegulations", false);
+            }}
           >
-            <a href="#" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+            <a 
+              href="#" 
+              onClick={(e) => { e.preventDefault(); setIsLecturerModalOpen(true); }} 
+              className="text-pink-400 hover:text-pink-300 underline"
+            >
               講師規約
             </a>
-            を遵守することを誓います
+            に同意し、遵守することを誓います
           </Checkbox>
         </div>
 
@@ -284,6 +313,27 @@ export default function CourseForm() {
 
       {/* Hidden DOM element for PNG rendering */}
       <CoursePngTemplate ref={templateRef} data={formData} />
+
+      <PolicyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+        onAgree={() => {
+          updateField("confirmPrivacyPolicy", true);
+          setIsPrivacyModalOpen(false);
+        }}
+        markdownPath="/privacy-policy.md"
+        title="プライバシーポリシー"
+      />
+      <PolicyModal
+        isOpen={isLecturerModalOpen}
+        onClose={() => setIsLecturerModalOpen(false)}
+        onAgree={() => {
+          updateField("confirmRegulations", true);
+          setIsLecturerModalOpen(false);
+        }}
+        markdownPath="/lecturer-policy.md"
+        title="講師規約"
+      />
     </div>
   );
 }

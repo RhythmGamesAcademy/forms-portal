@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import InstructorForm from "@/components/InstructorForm";
 import CourseForm from "@/components/CourseForm";
+import Faq from "@/components/Faq";
 
 type TabType = "instructor" | "course";
 
@@ -47,9 +48,12 @@ export default function Home() {
             申請書作成
           </h2>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            必要事項を入力し、「申請書PNGをダウンロード」ボタンを押すとA4風の申請書画像を生成できます。
+            必要事項を入力し、「申請書PNGをダウンロード」ボタンを押すとA4風の申請書画像を生成できます。<br />
+            生成後は所定の手続きに従って運営へ提出してください。
           </p>
         </div>
+
+        <Faq />
 
         {/* Card with Tabs & Forms */}
         <div className="card shadow-2xl">

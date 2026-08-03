@@ -10,6 +10,7 @@ export const DEPARTMENT_CATEGORIES: Record<Department, readonly string[]> = {
 
 // -- Instructor Registration Form --
 
+
 export interface InstructorFormData {
   name: string;
   age: string;
@@ -22,6 +23,7 @@ export interface InstructorFormData {
   achievements: string[];
   selfAppeal: string;
   confirmNoFalsehood: boolean;
+  confirmPrivacyPolicy: boolean;
   confirmRegulations: boolean;
 }
 
@@ -38,6 +40,7 @@ export function createEmptyInstructorForm(): InstructorFormData {
     achievements: [""],
     selfAppeal: "",
     confirmNoFalsehood: false,
+    confirmPrivacyPolicy: false,
     confirmRegulations: false,
   };
 }
@@ -55,6 +58,7 @@ export interface CourseFormData {
   approach: string;
   references: string;
   confirmNoFalsehood: boolean;
+  confirmPrivacyPolicy: boolean;
   confirmRegulations: boolean;
 }
 
@@ -70,6 +74,7 @@ export function createEmptyCourseForm(): CourseFormData {
     approach: "",
     references: "",
     confirmNoFalsehood: false,
+    confirmPrivacyPolicy: false,
     confirmRegulations: false,
   };
 }

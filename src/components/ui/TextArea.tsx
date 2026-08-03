@@ -54,9 +54,10 @@ export default function TextArea({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
+        aria-required={required}
         autoComplete="off"
       />
-      <div className={`char-counter ${isOverLimit ? "over-limit" : ""}`}>
+      <div className={`char-counter ${isOverLimit ? "over-limit" : ""}`} role={isOverLimit ? "alert" : undefined}>
         {charCount} / {maxLength}
       </div>
     </div>

@@ -22,7 +22,7 @@ export async function generatePng(
   await waitForFonts();
 
   const canvas = await html2canvas(element, {
-    scale: 1,
+    scale: 2,
     useCORS: true,
     allowTaint: true,
     backgroundColor: "#ffffff",

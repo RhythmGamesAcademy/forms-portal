@@ -50,12 +50,13 @@ export default function TextInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
+        aria-required={required}
         min={min}
         max={max}
         autoComplete="off"
       />
       {maxLength && (
-        <div className={`char-counter ${isOverLimit ? "over-limit" : ""}`}>
+        <div className={`char-counter ${isOverLimit ? "over-limit" : ""}`} role={isOverLimit ? "alert" : undefined}>
           {charCount} / {maxLength}
         </div>
       )}
