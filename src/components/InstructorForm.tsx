@@ -232,9 +232,9 @@ export default function InstructorForm() {
               else updateField("confirmPrivacyPolicy", false);
             }}
           >
-            <a 
-              href="#" 
-              onClick={(e) => { e.preventDefault(); setIsPrivacyModalOpen(true); }} 
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setIsPrivacyModalOpen(true); }}
               className="text-pink-400 hover:text-pink-300 underline"
             >
               プライバシーポリシー
@@ -249,12 +249,12 @@ export default function InstructorForm() {
               else updateField("confirmRegulations", false);
             }}
           >
-            <a 
-              href="#" 
-              onClick={(e) => { e.preventDefault(); setIsLecturerModalOpen(true); }} 
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setIsLecturerModalOpen(true); }}
               className="text-pink-400 hover:text-pink-300 underline"
             >
-              講師規約
+              講師ガイドライン
             </a>
             に同意し、遵守することを誓います
           </Checkbox>
@@ -301,7 +301,7 @@ export default function InstructorForm() {
           setIsLecturerModalOpen(false);
         }}
         markdownPath="/lecturer-policy.md"
-        title="講師規約"
+        title="講師ガイドライン"
       />
     </div>
   );
