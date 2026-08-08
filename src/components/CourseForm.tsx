@@ -79,9 +79,9 @@ export default function CourseForm() {
       courseCategory !== "" &&
       isSessionValid &&
       overview.trim() !== "" &&
-      overview.length <= CHAR_LIMITS.textDefault &&
+      overview.length <= CHAR_LIMITS.overview &&
       approach.trim() !== "" &&
-      approach.length <= CHAR_LIMITS.textDefault &&
+      approach.length <= CHAR_LIMITS.approach &&
       (references === "" || references.length <= CHAR_LIMITS.reference);
 
     const hasValidGoals =
@@ -128,7 +128,7 @@ export default function CourseForm() {
             onChange={(val) => updateField("subjectName", val)}
             placeholder={PLACEHOLDERS.course.subjectName}
             required
-            maxLength={50}
+            maxLength={CHAR_LIMITS.subjectName}
           />
           <TextInput
             id="course-instructor"
@@ -137,7 +137,7 @@ export default function CourseForm() {
             onChange={(val) => updateField("instructorName", val)}
             placeholder={PLACEHOLDERS.course.instructorName}
             required
-            maxLength={50}
+            maxLength={CHAR_LIMITS.instructorName}
           />
         </div>
 
@@ -209,7 +209,7 @@ export default function CourseForm() {
           onChange={(val) => updateField("overview", val)}
           placeholder={PLACEHOLDERS.course.overview}
           required
-          maxLength={CHAR_LIMITS.textDefault}
+          maxLength={CHAR_LIMITS.overview}
         />
 
         {/* Goals */}
@@ -220,7 +220,7 @@ export default function CourseForm() {
           onChange={(items) => updateField("goals", items)}
           placeholder={PLACEHOLDERS.course.goal}
           required
-          maxLength={100}
+          maxLength={CHAR_LIMITS.goal}
         />
 
         {/* Approach / Policy */}
@@ -231,7 +231,7 @@ export default function CourseForm() {
           onChange={(val) => updateField("approach", val)}
           placeholder={PLACEHOLDERS.course.approach}
           required
-          maxLength={CHAR_LIMITS.textDefault}
+          maxLength={CHAR_LIMITS.approach}
         />
 
         {/* References (optional) */}
@@ -263,9 +263,9 @@ export default function CourseForm() {
               else updateField("confirmPrivacyPolicy", false);
             }}
           >
-            <a 
-              href="#" 
-              onClick={(e) => { e.preventDefault(); setIsPrivacyModalOpen(true); }} 
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setIsPrivacyModalOpen(true); }}
               className="text-pink-400 hover:text-pink-300 underline"
             >
               プライバシーポリシー
@@ -280,9 +280,9 @@ export default function CourseForm() {
               else updateField("confirmRegulations", false);
             }}
           >
-            <a 
-              href="#" 
-              onClick={(e) => { e.preventDefault(); setIsLecturerModalOpen(true); }} 
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setIsLecturerModalOpen(true); }}
               className="text-pink-400 hover:text-pink-300 underline"
             >
               講師規約

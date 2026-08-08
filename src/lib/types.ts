@@ -4,8 +4,8 @@ export const DEPARTMENTS = ["音ゲー基礎学部", "音ゲー実践学部"] as
 export type Department = (typeof DEPARTMENTS)[number];
 
 export const DEPARTMENT_CATEGORIES: Record<Department, readonly string[]> = {
-  "音ゲー基礎学部": ["文理系講義", "創作系講義"],
-  "音ゲー実践学部": ["アーケード系講義", "モバイル系講義"],
+  "音ゲー基礎学部": ["文理系", "創作系"],
+  "音ゲー実践学部": ["アーケード系", "モバイル系"],
 } as const;
 
 // -- Instructor Registration Form --
