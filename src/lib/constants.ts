@@ -1,6 +1,7 @@
 // -- Character limits --
 
 export const CHAR_LIMITS = {
+  // 講師登録申請
   name: 15,
   age: 3,
   discordId: 32,
@@ -25,6 +26,10 @@ export const MAX_LIST_ITEMS = 5;
 
 export const SESSION_MIN = 3;
 export const SESSION_MAX = 15;
+
+// -- Filename constants --
+
+export const FILENAME_FALLBACK = "無題";
 
 // -- Placeholders --
 

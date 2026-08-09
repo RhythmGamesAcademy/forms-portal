@@ -23,6 +23,7 @@ export default function ListInput({
   maxLength,
 }: ListInputProps) {
   const canAdd = items.length < MAX_LIST_ITEMS;
+  const [focusedIndex, setFocusedIndex] = React.useState<number | null>(null);
 
   const handleItemChange = (index: number, value: string) => {
     const updated = [...items];
@@ -55,46 +56,63 @@ export default function ListInput({
       </label>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {items.map((item, index) => (
-          <div
-            key={`${id}-item-${index}`}
-            className="animate-slide-down"
-            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-          >
-            <span
-              style={{
-                flexShrink: 0,
-                width: "1.5rem",
-                textAlign: "center",
-                fontSize: "0.75rem",
-                color: "var(--color-text-muted)",
-                fontWeight: 600,
-              }}
-            >
-              {index + 1}
-            </span>
-            <input
-              id={`${id}-${index}`}
-              type="text"
-              className="form-input"
-              value={item}
-              onChange={(e) => handleItemChange(index, e.target.value)}
-              placeholder={placeholder}
-              maxLength={maxLength}
-              autoComplete="off"
-            />
-            {items.length > 1 && (
-              <button
-                type="button"
-                className="btn-remove"
-                onClick={() => handleRemove(index)}
-                aria-label={`${index + 1}番目を削除`}
-              >
-                x
-              </button>
-            )}
-          </div>
-        ))}
+        {items.map((item, index) => {
+          const charCount = item.length;
+          // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
+          const isOverLimit = maxLength ? charCount > maxLength : false;
+
+          return (
+            <div key={`${id}-item-${index}`} className="animate-slide-down">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span
+                  style={{
+                    flexShrink: 0,
+                    width: "1.5rem",
+                    textAlign: "center",
+                    fontSize: "0.75rem",
+                    color: "var(--color-text-muted)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {index + 1}
+                </span>
+                <input
+                  id={`${id}-${index}`}
+                  type="text"
+                  className={`form-input ${isOverLimit ? "has-error" : ""}`}
+                  value={item}
+                  onChange={(e) => handleItemChange(index, e.target.value)}
+                  onFocus={() => setFocusedIndex(index)}
+                  onBlur={() => setFocusedIndex(null)}
+                  placeholder={placeholder}
+                  aria-invalid={isOverLimit}
+                  aria-describedby={maxLength ? `${id}-${index}-counter ${id}-${index}-error` : undefined}
+                  autoComplete="off"
+                />
+                {items.length > 1 && (
+                  <button
+                    type="button"
+                    className="btn-remove"
+                    onClick={() => handleRemove(index)}
+                    aria-label={`${index + 1}番目を削除`}
+                  >
+                    x
+                  </button>
+                )}
+              </div>
+              {maxLength && (focusedIndex === index || isOverLimit) && (
+                <div className="flex justify-between items-center mt-1 pl-8 pr-12">
+                  <div id={`${id}-${index}-error`} className="text-xs text-[var(--color-error)]" role="alert">
+                    {isOverLimit && `${charCount - maxLength}文字超過しています`}
+                  </div>
+                  <div id={`${id}-${index}-counter`} className={`char-counter !mt-0 ${isOverLimit ? "over-limit" : ""}`}>
+                    {charCount} / {maxLength}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div style={{ marginTop: "0.5rem" }}>

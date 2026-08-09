@@ -1,4 +1,26 @@
 import html2canvas from "html2canvas";
+import { FILENAME_FALLBACK } from "./constants";
+
+/**
+ * Sanitize a string for safe use in filenames.
+ * - Removes filesystem-unsafe characters (\ / : * ? " < > |)
+ * - Preserves emojis and full-width characters (e.g., 日本語, 😊)
+ * - Replaces whitespace and control characters with underscores
+ * - Returns FILENAME_FALLBACK if the result is empty
+ */
+export function sanitizeFilename(name: string): string {
+  return name
+    .trim()
+    // Remove filesystem-unsafe characters (Windows/macOS/Linux)
+    .replace(/[\\/:*?"<>|]/g, "")
+    // Replace consecutive whitespace/control chars with a single underscore
+    .replace(/[\s\u0000-\u001f\u007f]+/g, "_")
+    // Collapse multiple underscores
+    .replace(/_+/g, "_")
+    // Strip leading/trailing underscores
+    .replace(/^_+|_+$/g, "")
+    || FILENAME_FALLBACK;
+}
 
 /**
  * Wait for all fonts to be loaded before rendering.

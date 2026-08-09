@@ -30,7 +30,7 @@ export default function Faq() {
 
   if (error) {
     return (
-      <div className="p-4 mb-8 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400 text-sm">
+      <div className="p-4 mb-8 bg-[var(--color-error-bg)] border border-[var(--color-error-border)] rounded-lg text-[var(--color-error)] text-sm">
         FAQの読み込みに失敗しました: {error}
       </div>
     );

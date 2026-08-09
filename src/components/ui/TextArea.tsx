@@ -25,6 +25,7 @@ export default function TextArea({
 }: TextAreaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const charCount = value.length;
+  // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
   const isOverLimit = charCount > maxLength;
 
   // Auto-resize textarea
@@ -55,10 +56,17 @@ export default function TextArea({
         placeholder={placeholder}
         disabled={disabled}
         aria-required={required}
+        aria-invalid={isOverLimit}
+        aria-describedby={`${id}-counter ${id}-error`}
         autoComplete="off"
       />
-      <div className={`char-counter ${isOverLimit ? "over-limit" : ""}`} role={isOverLimit ? "alert" : undefined}>
-        {charCount} / {maxLength}
+      <div className="flex justify-between items-center mt-1">
+        <div id={`${id}-error`} className="text-xs text-[var(--color-error)]" role="alert">
+          {isOverLimit && `${charCount - maxLength}文字超過しています`}
+        </div>
+        <div id={`${id}-counter`} className={`char-counter !mt-0 ${isOverLimit ? "over-limit" : ""}`}>
+          {charCount} / {maxLength}
+        </div>
       </div>
     </div>
   );

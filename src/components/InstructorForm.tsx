@@ -5,8 +5,7 @@ import TextInput from "./ui/TextInput";
 import TextArea from "./ui/TextArea";
 import SelectInput from "./ui/SelectInput";
 import ListInput from "./ui/ListInput";
-import Checkbox from "./ui/Checkbox";
-import PolicyModal from "./ui/PolicyModal";
+import AgreementSection from "./ui/AgreementSection";
 import InstructorPngTemplate from "./png/InstructorPngTemplate";
 import {
   type InstructorFormData,
@@ -15,18 +14,28 @@ import {
   DEPARTMENT_CATEGORIES,
 } from "@/lib/types";
 import { CHAR_LIMITS, PLACEHOLDERS } from "@/lib/constants";
-import { generatePng, formatDateForFilename } from "@/lib/generatePng";
+import { generatePng, formatDateForFilename, sanitizeFilename } from "@/lib/generatePng";
+import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
 
 export default function InstructorForm() {
   const [formData, setFormData] = useState<InstructorFormData>(createEmptyInstructorForm());
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
-  const [isLecturerModalOpen, setIsLecturerModalOpen] = useState(false);
   const templateRef = useRef<HTMLDivElement>(null);
+
+  const { activeModalId, openModal, closeModal, handleCheckboxChange } = usePolicyAgreement({
+    onAgree: (field, value) => updateField(field as keyof InstructorFormData, value as InstructorFormData[keyof InstructorFormData]),
+  });
 
   // Field change helpers
   const updateField = <K extends keyof InstructorFormData>(key: K, value: InstructorFormData[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // Convert full-width numbers to half-width and keep only digits
+  const handleAgeChange = (value: string) => {
+    const halfWidth = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+    const digitsOnly = halfWidth.replace(/[^0-9]/g, "");
+    updateField("age", digitsOnly);
   };
 
   // Handle department change with cascading reset of courseCategory
@@ -44,6 +53,7 @@ export default function InstructorForm() {
       name,
       age,
       discordId,
+      xId,
       field,
       department,
       courseCategory,
@@ -57,18 +67,25 @@ export default function InstructorForm() {
 
     const hasRequiredFields =
       name.trim() !== "" &&
+      name.length <= CHAR_LIMITS.name &&
       age.trim() !== "" &&
+      age.length <= CHAR_LIMITS.age &&
       discordId.trim() !== "" &&
+      discordId.length <= CHAR_LIMITS.discordId &&
+      (xId === "" || xId.length <= CHAR_LIMITS.xId) &&
       field.trim() !== "" &&
+      field.length <= CHAR_LIMITS.field &&
       department !== "" &&
       courseCategory !== "" &&
       fieldReason.trim() !== "" &&
-      fieldReason.length <= CHAR_LIMITS.textDefault &&
+      fieldReason.length <= CHAR_LIMITS.fieldReason &&
       selfAppeal.trim() !== "" &&
       selfAppeal.length <= CHAR_LIMITS.selfAppeal;
 
     const hasValidAchievements =
-      achievements.length > 0 && achievements.some((a) => a.trim() !== "");
+      achievements.length > 0 &&
+      achievements.some((a) => a.trim() !== "") &&
+      achievements.filter(a => a.trim() !== "").every((a) => a.length <= CHAR_LIMITS.achievement);
 
     return (
       hasRequiredFields &&
@@ -85,7 +102,7 @@ export default function InstructorForm() {
 
     try {
       setIsGenerating(true);
-      const filename = `講師登録申請書_${formData.name.trim() || "無題"}_${formatDateForFilename()}.png`;
+      const filename = `講師登録申請書_${sanitizeFilename(formData.name)}_${formatDateForFilename()}.png`;
       await generatePng(templateRef.current, filename);
     } catch (err) {
       console.error("PNG generation error:", err);
@@ -111,16 +128,18 @@ export default function InstructorForm() {
             onChange={(val) => updateField("name", val)}
             placeholder={PLACEHOLDERS.instructor.name}
             required
-            maxLength={50}
+            maxLength={CHAR_LIMITS.name}
           />
           <TextInput
             id="instructor-age"
             label="年齢"
             value={formData.age}
-            onChange={(val) => updateField("age", val)}
+            onChange={handleAgeChange}
             placeholder={PLACEHOLDERS.instructor.age}
             required
-            maxLength={10}
+            maxLength={CHAR_LIMITS.age}
+            inputMode="numeric"
+            pattern="[0-9]*"
           />
         </div>
 
@@ -133,7 +152,7 @@ export default function InstructorForm() {
             onChange={(val) => updateField("discordId", val)}
             placeholder={PLACEHOLDERS.instructor.discordId}
             required
-            maxLength={50}
+            maxLength={CHAR_LIMITS.discordId}
           />
           <TextInput
             id="instructor-x"
@@ -141,7 +160,7 @@ export default function InstructorForm() {
             value={formData.xId}
             onChange={(val) => updateField("xId", val)}
             placeholder={PLACEHOLDERS.instructor.xId}
-            maxLength={50}
+            maxLength={CHAR_LIMITS.xId}
           />
         </div>
 
@@ -153,7 +172,7 @@ export default function InstructorForm() {
           onChange={(val) => updateField("field", val)}
           placeholder={PLACEHOLDERS.instructor.field}
           required
-          maxLength={100}
+          maxLength={CHAR_LIMITS.field}
         />
 
         {/* Department & Course Category */}
@@ -188,7 +207,7 @@ export default function InstructorForm() {
           onChange={(val) => updateField("fieldReason", val)}
           placeholder={PLACEHOLDERS.instructor.fieldReason}
           required
-          maxLength={CHAR_LIMITS.textDefault}
+          maxLength={CHAR_LIMITS.fieldReason}
         />
 
         {/* Achievements */}
@@ -199,7 +218,7 @@ export default function InstructorForm() {
           onChange={(items) => updateField("achievements", items)}
           placeholder={PLACEHOLDERS.instructor.achievement}
           required
-          maxLength={100}
+          maxLength={CHAR_LIMITS.achievement}
         />
 
         {/* Self Appeal */}
@@ -213,52 +232,44 @@ export default function InstructorForm() {
           maxLength={CHAR_LIMITS.selfAppeal}
         />
 
-        <hr className="section-divider" />
-
-        {/* Confirmations */}
-        <div className="space-y-2">
-          <Checkbox
-            id="confirm-falsehood-inst"
-            checked={formData.confirmNoFalsehood}
-            onChange={(val) => updateField("confirmNoFalsehood", val)}
-          >
-            申請内容に虚偽はありません
-          </Checkbox>
-          <Checkbox
-            id="confirm-privacy-inst"
-            checked={formData.confirmPrivacyPolicy}
-            onChange={(val) => {
-              if (val) setIsPrivacyModalOpen(true);
-              else updateField("confirmPrivacyPolicy", false);
-            }}
-          >
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); setIsPrivacyModalOpen(true); }}
-              className="text-pink-400 hover:text-pink-300 underline"
-            >
-              プライバシーポリシー
-            </a>
-            に同意します
-          </Checkbox>
-          <Checkbox
-            id="confirm-regulations-inst"
-            checked={formData.confirmRegulations}
-            onChange={(val) => {
-              if (val) setIsLecturerModalOpen(true);
-              else updateField("confirmRegulations", false);
-            }}
-          >
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); setIsLecturerModalOpen(true); }}
-              className="text-pink-400 hover:text-pink-300 underline"
-            >
-              講師ガイドライン
-            </a>
-            に同意し、遵守することを誓います
-          </Checkbox>
+        <div className="section-heading-group">
+          <hr className="section-divider" />
+          <h3 className="section-heading">確認・同意</h3>
         </div>
+
+        <AgreementSection
+          confirmNoFalsehood={formData.confirmNoFalsehood}
+          onFalsehoodChange={(val) => updateField("confirmNoFalsehood", val)}
+          falsehoodCheckboxId="confirm-falsehood-inst"
+          policies={[
+            {
+              modalId: "privacy",
+              checkboxId: "confirm-privacy-inst",
+              checked: formData.confirmPrivacyPolicy,
+              markdownPath: "/privacy-policy.md",
+              title: "プライバシーポリシー",
+              label: "に同意します",
+              field: "confirmPrivacyPolicy",
+            },
+            {
+              modalId: "lecturer",
+              checkboxId: "confirm-regulations-inst",
+              checked: formData.confirmRegulations,
+              markdownPath: "/lecturer-policy.md",
+              title: "講師ガイドライン",
+              label: "に同意し、遵守することを誓います",
+              field: "confirmRegulations",
+            },
+          ]}
+          activeModalId={activeModalId}
+          onModalClose={closeModal}
+          onModalAgree={(field) => {
+            updateField(field as keyof InstructorFormData, true as InstructorFormData[keyof InstructorFormData]);
+            closeModal();
+          }}
+          onCheckboxChange={handleCheckboxChange}
+          onOpenModal={openModal}
+        />
 
         {/* Generate Button */}
         <div className="pt-2">
@@ -282,27 +293,6 @@ export default function InstructorForm() {
 
       {/* Hidden DOM element for PNG rendering */}
       <InstructorPngTemplate ref={templateRef} data={formData} />
-
-      <PolicyModal
-        isOpen={isPrivacyModalOpen}
-        onClose={() => setIsPrivacyModalOpen(false)}
-        onAgree={() => {
-          updateField("confirmPrivacyPolicy", true);
-          setIsPrivacyModalOpen(false);
-        }}
-        markdownPath="/privacy-policy.md"
-        title="プライバシーポリシー"
-      />
-      <PolicyModal
-        isOpen={isLecturerModalOpen}
-        onClose={() => setIsLecturerModalOpen(false)}
-        onAgree={() => {
-          updateField("confirmRegulations", true);
-          setIsLecturerModalOpen(false);
-        }}
-        markdownPath="/lecturer-policy.md"
-        title="講師ガイドライン"
-      />
     </div>
   );
 }

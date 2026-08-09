@@ -53,25 +53,44 @@ export default function Home() {
           </p>
         </div>
 
-        <Faq />
-
         {/* Card with Tabs & Forms */}
         <div className="card shadow-2xl">
           {/* Tab Navigation */}
-          <div className="tab-container" role="tablist">
+          <div
+            className="tab-container"
+            role="tablist"
+            aria-label="申請種別"
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                e.preventDefault();
+                const newTab = activeTab === "instructor" ? "course" : "instructor";
+                setActiveTab(newTab);
+                // Also focus the newly activated tab
+                setTimeout(() => {
+                  document.getElementById(`tab-${newTab}`)?.focus();
+                }, 0);
+              }
+            }}
+          >
             <button
+              id="tab-instructor"
               type="button"
               role="tab"
               aria-selected={activeTab === "instructor"}
+              aria-controls="panel-instructor"
+              tabIndex={activeTab === "instructor" ? 0 : -1}
               className={`tab-button ${activeTab === "instructor" ? "active" : ""}`}
               onClick={() => setActiveTab("instructor")}
             >
               講師登録申請
             </button>
             <button
+              id="tab-course"
               type="button"
               role="tab"
               aria-selected={activeTab === "course"}
+              aria-controls="panel-course"
+              tabIndex={activeTab === "course" ? 0 : -1}
               className={`tab-button ${activeTab === "course" ? "active" : ""}`}
               onClick={() => setActiveTab("course")}
             >
@@ -81,8 +100,27 @@ export default function Home() {
 
           {/* Form Content */}
           <div className="card-body">
-            {activeTab === "instructor" ? <InstructorForm /> : <CourseForm />}
+            <div
+              id="panel-instructor"
+              role="tabpanel"
+              aria-labelledby="tab-instructor"
+              hidden={activeTab !== "instructor"}
+            >
+              <InstructorForm />
+            </div>
+            <div
+              id="panel-course"
+              role="tabpanel"
+              aria-labelledby="tab-course"
+              hidden={activeTab !== "course"}
+            >
+              <CourseForm />
+            </div>
           </div>
+        </div>
+
+        <div className="mt-8">
+          <Faq />
         </div>
       </main>
 

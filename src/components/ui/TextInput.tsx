@@ -11,6 +11,8 @@ interface TextInputProps {
   required?: boolean;
   maxLength?: number;
   type?: "text" | "number";
+  inputMode?: "text" | "numeric" | "decimal" | "tel" | "email" | "url";
+  pattern?: string;
   min?: number;
   max?: number;
   disabled?: boolean;
@@ -25,11 +27,14 @@ export default function TextInput({
   required = false,
   maxLength,
   type = "text",
+  inputMode,
+  pattern,
   min,
   max,
   disabled = false,
 }: TextInputProps) {
   const charCount = value.length;
+  // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
   const isOverLimit = maxLength ? charCount > maxLength : false;
 
   return (
@@ -51,13 +56,22 @@ export default function TextInput({
         placeholder={placeholder}
         disabled={disabled}
         aria-required={required}
+        aria-invalid={isOverLimit}
+        aria-describedby={maxLength ? `${id}-counter ${id}-error` : undefined}
+        inputMode={inputMode}
+        pattern={pattern}
         min={min}
         max={max}
         autoComplete="off"
       />
       {maxLength && (
-        <div className={`char-counter ${isOverLimit ? "over-limit" : ""}`} role={isOverLimit ? "alert" : undefined}>
-          {charCount} / {maxLength}
+        <div className="flex justify-between items-center mt-1">
+          <div id={`${id}-error`} className="text-xs text-[var(--color-error)]" role="alert">
+            {isOverLimit && `${charCount - maxLength}文字超過しています`}
+          </div>
+          <div id={`${id}-counter`} className={`char-counter !mt-0 ${isOverLimit ? "over-limit" : ""}`}>
+            {charCount} / {maxLength}
+          </div>
         </div>
       )}
     </div>

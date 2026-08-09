@@ -23,20 +23,76 @@ export default function PolicyModal({
   const [hasReachedBottom, setHasReachedBottom] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (isOpen) {
-      setHasReachedBottom(false);
       // If content is very short and doesn't require scrolling, we should enable the button
       setTimeout(() => {
         if (scrollRef.current) {
           const { scrollHeight, clientHeight } = scrollRef.current;
           if (scrollHeight <= clientHeight) {
             setHasReachedBottom(true);
+          } else {
+            setHasReachedBottom(false);
           }
         }
       }, 100); // Wait a bit for render
     }
   }, [isOpen, content]);
+
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+
+      const focusableElements = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusableElements && focusableElements.length > 0) {
+        // Focus the first element (close button in header)
+        (focusableElements[0] as HTMLElement).focus();
+      }
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          onClose();
+          return;
+        }
+
+        if (e.key === "Tab" && modalRef.current) {
+          const elements = modalRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (elements.length === 0) return;
+          const firstElement = elements[0] as HTMLElement;
+          const lastElement = elements[elements.length - 1] as HTMLElement;
+
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+              lastElement.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              firstElement.focus();
+              e.preventDefault();
+            }
+          }
+        }
+      };
+
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    } else {
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+        previousFocusRef.current = null;
+      }
+    }
+  }, [isOpen, onClose]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -53,16 +109,22 @@ export default function PolicyModal({
       onClick={onClose}
     >
       <div
-        className="bg-[#1a1025] border border-fuchsia-900/50 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden text-gray-200"
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="policy-modal-title"
+        className="bg-[var(--color-bg-modal)] border border-[var(--color-border-modal)] rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden text-[var(--color-text-primary)]"
         onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
       >
-        <div className="p-4 border-b border-fuchsia-900/30 flex justify-between items-center bg-[#251535]">
-          <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+        <div className="p-4 border-b border-[var(--color-border-modal-divider)] flex justify-between items-center bg-[var(--color-bg-modal-header)]">
+          <h2 id="policy-modal-title" className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-pink)] to-[var(--color-accent-purple)]">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors text-xl font-semibold px-2"
+            aria-label="閉じる"
+            className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors text-xl font-semibold px-2"
           >
             ✕
           </button>
@@ -72,14 +134,15 @@ export default function PolicyModal({
           className="p-6 overflow-y-auto flex-1 prose prose-invert prose-pink max-w-none text-sm md:text-base leading-relaxed"
           onScroll={handleScroll}
           ref={scrollRef}
+          tabIndex={0}
         >
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-48 space-y-4">
               <span className="spinner w-8 h-8 border-4" />
-              <p className="text-purple-300">読み込み中...</p>
+              <p className="text-[var(--color-accent-lavender)]">読み込み中...</p>
             </div>
           ) : error ? (
-            <div className="text-red-400 p-4 bg-red-900/20 rounded-lg">
+            <div className="text-[var(--color-error)] p-4 bg-[var(--color-error-bg)] rounded-lg">
               読み込みエラー: {error}
             </div>
           ) : (
@@ -87,10 +150,10 @@ export default function PolicyModal({
           )}
         </div>
         
-        <div className="p-4 border-t border-fuchsia-900/30 bg-[#251535] flex justify-end space-x-3">
+        <div className="p-4 border-t border-[var(--color-border-modal-divider)] bg-[var(--color-bg-modal-header)] flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-600 hover:bg-gray-800 transition-colors"
+            className="px-4 py-2 rounded-lg text-sm font-medium border border-[var(--color-border)] hover:bg-[var(--color-bg-elevated)] transition-colors"
           >
             閉じる
           </button>
@@ -99,8 +162,8 @@ export default function PolicyModal({
             disabled={!hasReachedBottom}
             className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
               hasReachedBottom 
-                ? 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white shadow-lg shadow-purple-900/20' 
-                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-[var(--color-accent-pink)] to-[var(--color-accent-purple)] text-white shadow-lg shadow-[var(--color-accent-purple)]/20 hover:opacity-90' 
+                : 'bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] cursor-not-allowed'
             }`}
           >
             同意する

@@ -5,8 +5,7 @@ import TextInput from "./ui/TextInput";
 import TextArea from "./ui/TextArea";
 import SelectInput from "./ui/SelectInput";
 import ListInput from "./ui/ListInput";
-import Checkbox from "./ui/Checkbox";
-import PolicyModal from "./ui/PolicyModal";
+import AgreementSection from "./ui/AgreementSection";
 import CoursePngTemplate from "./png/CoursePngTemplate";
 import {
   type CourseFormData,
@@ -16,14 +15,17 @@ import {
   calculateCredits,
 } from "@/lib/types";
 import { CHAR_LIMITS, PLACEHOLDERS, SESSION_MIN, SESSION_MAX } from "@/lib/constants";
-import { generatePng, formatDateForFilename } from "@/lib/generatePng";
+import { generatePng, formatDateForFilename, sanitizeFilename } from "@/lib/generatePng";
+import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
 
 export default function CourseForm() {
   const [formData, setFormData] = useState<CourseFormData>(createEmptyCourseForm());
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
-  const [isLecturerModalOpen, setIsLecturerModalOpen] = useState(false);
   const templateRef = useRef<HTMLDivElement>(null);
+
+  const { activeModalId, openModal, closeModal, handleCheckboxChange } = usePolicyAgreement({
+    onAgree: (field, value) => updateField(field as keyof CourseFormData, value as CourseFormData[keyof CourseFormData]),
+  });
 
   // Field change helper
   const updateField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
@@ -74,7 +76,9 @@ export default function CourseForm() {
 
     const hasRequiredFields =
       subjectName.trim() !== "" &&
+      subjectName.length <= CHAR_LIMITS.subjectName &&
       instructorName.trim() !== "" &&
+      instructorName.length <= CHAR_LIMITS.instructorName &&
       department !== "" &&
       courseCategory !== "" &&
       isSessionValid &&
@@ -85,7 +89,9 @@ export default function CourseForm() {
       (references === "" || references.length <= CHAR_LIMITS.reference);
 
     const hasValidGoals =
-      goals.length > 0 && goals.some((g) => g.trim() !== "");
+      goals.length > 0 &&
+      goals.some((g) => g.trim() !== "") &&
+      goals.filter(g => g.trim() !== "").every((g) => g.length <= CHAR_LIMITS.goal);
 
     return (
       hasRequiredFields &&
@@ -102,7 +108,7 @@ export default function CourseForm() {
 
     try {
       setIsGenerating(true);
-      const filename = `講義開講申請書_${formData.subjectName.trim() || "無題"}_${formatDateForFilename()}.png`;
+      const filename = `講義開講申請書_${sanitizeFilename(formData.subjectName)}_${formatDateForFilename()}.png`;
       await generatePng(templateRef.current, filename);
     } catch (err) {
       console.error("PNG generation error:", err);
@@ -180,7 +186,7 @@ export default function CourseForm() {
               max={SESSION_MAX}
             />
             {formData.sessionCount !== "" && !isSessionValid && (
-              <p className="text-xs text-red-400 mt-1">
+              <p className="text-xs text-[var(--color-error)] mt-1">
                 講義回数は {SESSION_MIN}〜{SESSION_MAX} 回の範囲で入力してください
               </p>
             )}
@@ -244,52 +250,44 @@ export default function CourseForm() {
           maxLength={CHAR_LIMITS.reference}
         />
 
-        <hr className="section-divider" />
-
-        {/* Confirmations */}
-        <div className="space-y-2">
-          <Checkbox
-            id="confirm-falsehood-course"
-            checked={formData.confirmNoFalsehood}
-            onChange={(val) => updateField("confirmNoFalsehood", val)}
-          >
-            申請内容に虚偽はありません
-          </Checkbox>
-          <Checkbox
-            id="confirm-privacy-course"
-            checked={formData.confirmPrivacyPolicy}
-            onChange={(val) => {
-              if (val) setIsPrivacyModalOpen(true);
-              else updateField("confirmPrivacyPolicy", false);
-            }}
-          >
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); setIsPrivacyModalOpen(true); }}
-              className="text-pink-400 hover:text-pink-300 underline"
-            >
-              プライバシーポリシー
-            </a>
-            に同意します
-          </Checkbox>
-          <Checkbox
-            id="confirm-regulations-course"
-            checked={formData.confirmRegulations}
-            onChange={(val) => {
-              if (val) setIsLecturerModalOpen(true);
-              else updateField("confirmRegulations", false);
-            }}
-          >
-            <a
-              href="#"
-              onClick={(e) => { e.preventDefault(); setIsLecturerModalOpen(true); }}
-              className="text-pink-400 hover:text-pink-300 underline"
-            >
-              講師規約
-            </a>
-            に同意し、遵守することを誓います
-          </Checkbox>
+        <div className="section-heading-group">
+          <hr className="section-divider" />
+          <h3 className="section-heading">確認・同意</h3>
         </div>
+
+        <AgreementSection
+          confirmNoFalsehood={formData.confirmNoFalsehood}
+          onFalsehoodChange={(val) => updateField("confirmNoFalsehood", val)}
+          falsehoodCheckboxId="confirm-falsehood-course"
+          policies={[
+            {
+              modalId: "privacy",
+              checkboxId: "confirm-privacy-course",
+              checked: formData.confirmPrivacyPolicy,
+              markdownPath: "/privacy-policy.md",
+              title: "プライバシーポリシー",
+              label: "に同意します",
+              field: "confirmPrivacyPolicy",
+            },
+            {
+              modalId: "lecturer",
+              checkboxId: "confirm-regulations-course",
+              checked: formData.confirmRegulations,
+              markdownPath: "/lecturer-policy.md",
+              title: "講師規約",
+              label: "に同意し、遵守することを誓います",
+              field: "confirmRegulations",
+            },
+          ]}
+          activeModalId={activeModalId}
+          onModalClose={closeModal}
+          onModalAgree={(field) => {
+            updateField(field as keyof CourseFormData, true as CourseFormData[keyof CourseFormData]);
+            closeModal();
+          }}
+          onCheckboxChange={handleCheckboxChange}
+          onOpenModal={openModal}
+        />
 
         {/* Generate Button */}
         <div className="pt-2">
@@ -313,27 +311,6 @@ export default function CourseForm() {
 
       {/* Hidden DOM element for PNG rendering */}
       <CoursePngTemplate ref={templateRef} data={formData} />
-
-      <PolicyModal
-        isOpen={isPrivacyModalOpen}
-        onClose={() => setIsPrivacyModalOpen(false)}
-        onAgree={() => {
-          updateField("confirmPrivacyPolicy", true);
-          setIsPrivacyModalOpen(false);
-        }}
-        markdownPath="/privacy-policy.md"
-        title="プライバシーポリシー"
-      />
-      <PolicyModal
-        isOpen={isLecturerModalOpen}
-        onClose={() => setIsLecturerModalOpen(false)}
-        onAgree={() => {
-          updateField("confirmRegulations", true);
-          setIsLecturerModalOpen(false);
-        }}
-        markdownPath="/lecturer-policy.md"
-        title="講師規約"
-      />
     </div>
   );
 }
