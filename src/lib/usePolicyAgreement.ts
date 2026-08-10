@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import type { AgreementField } from "./types";
 
 type PolicyAgreementOptions = {
-  onAgree: (field: string, value: boolean) => void;
+  onAgree: (field: AgreementField, value: boolean) => void;
 };
 
 type PolicyModalConfig = {
-  field: string;
+  field: AgreementField;
   markdownPath: string;
   title: string;
 };
@@ -17,7 +18,7 @@ export type PolicyAgreementReturn = {
   closeModal: () => void;
   activeModalId: string | null;
   handleCheckboxChange: (
-    field: string,
+    field: AgreementField,
     val: boolean,
     modalId: string
   ) => void;
@@ -37,7 +38,7 @@ export function usePolicyAgreement({
   };
 
   const handleCheckboxChange = (
-    field: string,
+    field: AgreementField,
     val: boolean,
     modalId: string
   ) => {

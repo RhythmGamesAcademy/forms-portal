@@ -6,6 +6,7 @@ import TextArea from "./ui/TextArea";
 import SelectInput from "./ui/SelectInput";
 import ListInput from "./ui/ListInput";
 import AgreementSection from "./ui/AgreementSection";
+import SectionHeading from "./ui/SectionHeading";
 import InstructorPngTemplate from "./png/InstructorPngTemplate";
 import {
   type InstructorFormData,
@@ -23,7 +24,7 @@ export default function InstructorForm() {
   const templateRef = useRef<HTMLDivElement>(null);
 
   const { activeModalId, openModal, closeModal, handleCheckboxChange } = usePolicyAgreement({
-    onAgree: (field, value) => updateField(field as keyof InstructorFormData, value as InstructorFormData[keyof InstructorFormData]),
+    onAgree: (field, value) => updateField(field, value),
   });
 
   // Field change helpers
@@ -119,6 +120,8 @@ export default function InstructorForm() {
   return (
     <div>
       <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+        <SectionHeading divider={false}>基本情報</SectionHeading>
+
         {/* Name & Age */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextInput
@@ -163,6 +166,8 @@ export default function InstructorForm() {
             maxLength={CHAR_LIMITS.xId}
           />
         </div>
+
+        <SectionHeading>担当領域</SectionHeading>
 
         {/* Field */}
         <TextInput
@@ -210,6 +215,8 @@ export default function InstructorForm() {
           maxLength={CHAR_LIMITS.fieldReason}
         />
 
+        <SectionHeading>実績・自己PR</SectionHeading>
+
         {/* Achievements */}
         <ListInput
           id="instructor-achievements"
@@ -232,10 +239,7 @@ export default function InstructorForm() {
           maxLength={CHAR_LIMITS.selfAppeal}
         />
 
-        <div className="section-heading-group">
-          <hr className="section-divider" />
-          <h3 className="section-heading">確認・同意</h3>
-        </div>
+        <SectionHeading>確認・同意</SectionHeading>
 
         <AgreementSection
           confirmNoFalsehood={formData.confirmNoFalsehood}
@@ -264,7 +268,7 @@ export default function InstructorForm() {
           activeModalId={activeModalId}
           onModalClose={closeModal}
           onModalAgree={(field) => {
-            updateField(field as keyof InstructorFormData, true as InstructorFormData[keyof InstructorFormData]);
+            updateField(field, true);
             closeModal();
           }}
           onCheckboxChange={handleCheckboxChange}

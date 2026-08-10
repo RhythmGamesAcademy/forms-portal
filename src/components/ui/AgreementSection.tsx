@@ -3,6 +3,7 @@
 import React from "react";
 import Checkbox from "./Checkbox";
 import PolicyModal from "./PolicyModal";
+import type { AgreementField } from "@/lib/types";
 
 type PolicyItem = {
   modalId: string;
@@ -11,7 +12,7 @@ type PolicyItem = {
   markdownPath: string;
   title: string;
   label: React.ReactNode;
-  field: string;
+  field: AgreementField;
 };
 
 type AgreementSectionProps = {
@@ -21,8 +22,8 @@ type AgreementSectionProps = {
   policies: PolicyItem[];
   activeModalId: string | null;
   onModalClose: () => void;
-  onModalAgree: (field: string) => void;
-  onCheckboxChange: (field: string, val: boolean, modalId: string) => void;
+  onModalAgree: (field: AgreementField) => void;
+  onCheckboxChange: (field: AgreementField, val: boolean, modalId: string) => void;
   onOpenModal: (modalId: string) => void;
 };
 
@@ -72,16 +73,19 @@ export default function AgreementSection({
         ))}
       </div>
 
-      {policies.map((policy) => (
-        <PolicyModal
-          key={policy.modalId}
-          isOpen={activeModalId === policy.modalId}
-          onClose={onModalClose}
-          onAgree={() => onModalAgree(policy.field)}
-          markdownPath={policy.markdownPath}
-          title={policy.title}
-        />
-      ))}
+      {/* Mount only the active modal, so its scroll/agreement state
+          is rebuilt from scratch every time it is opened. */}
+      {policies
+        .filter((policy) => policy.modalId === activeModalId)
+        .map((policy) => (
+          <PolicyModal
+            key={policy.modalId}
+            onClose={onModalClose}
+            onAgree={() => onModalAgree(policy.field)}
+            markdownPath={policy.markdownPath}
+            title={policy.title}
+          />
+        ))}
     </>
   );
 }

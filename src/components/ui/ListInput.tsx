@@ -45,37 +45,29 @@ export default function ListInput({
   };
 
   return (
-    <div className="animate-fade-in">
-      <label className="form-label">
+    <fieldset className="list-fieldset animate-fade-in">
+      <legend className="form-legend">
         {label}
         {required ? (
           <span className="badge-required">必須</span>
         ) : (
           <span className="badge-optional">任意</span>
         )}
-      </label>
+      </legend>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      <div className="list-items">
         {items.map((item, index) => {
           const charCount = item.length;
           // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
+          // maxLength 属性で通常は超過しないが、ペースト・IME・プログラム的変更の
+          // 抜け道が残るため、検知とバリデーションは残す。
           const isOverLimit = maxLength ? charCount > maxLength : false;
+          const isAtLimit = maxLength ? charCount === maxLength : false;
 
           return (
             <div key={`${id}-item-${index}`} className="animate-slide-down">
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <span
-                  style={{
-                    flexShrink: 0,
-                    width: "1.5rem",
-                    textAlign: "center",
-                    fontSize: "0.75rem",
-                    color: "var(--color-text-muted)",
-                    fontWeight: 600,
-                  }}
-                >
-                  {index + 1}
-                </span>
+              <div className="list-row">
+                <span className="list-index">{index + 1}</span>
                 <input
                   id={`${id}-${index}`}
                   type="text"
@@ -85,6 +77,7 @@ export default function ListInput({
                   onFocus={() => setFocusedIndex(index)}
                   onBlur={() => setFocusedIndex(null)}
                   placeholder={placeholder}
+                  maxLength={maxLength}
                   aria-invalid={isOverLimit}
                   aria-describedby={maxLength ? `${id}-${index}-counter ${id}-${index}-error` : undefined}
                   autoComplete="off"
@@ -102,8 +95,14 @@ export default function ListInput({
               </div>
               {maxLength && (focusedIndex === index || isOverLimit) && (
                 <div className="flex justify-between items-center mt-1 pl-8 pr-12">
-                  <div id={`${id}-${index}-error`} className="text-xs text-[var(--color-error)]" role="alert">
-                    {isOverLimit && `${charCount - maxLength}文字超過しています`}
+                  <div
+                    id={`${id}-${index}-error`}
+                    className={`text-xs ${isOverLimit ? "text-[var(--color-error)]" : "text-[var(--color-text-muted)]"}`}
+                    aria-live="polite"
+                  >
+                    {isOverLimit
+                      ? `${charCount - maxLength}文字超過しています`
+                      : isAtLimit && "上限に達しました"}
                   </div>
                   <div id={`${id}-${index}-counter`} className={`char-counter !mt-0 ${isOverLimit ? "over-limit" : ""}`}>
                     {charCount} / {maxLength}
@@ -115,26 +114,17 @@ export default function ListInput({
         })}
       </div>
 
-      <div style={{ marginTop: "0.5rem" }}>
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={handleAdd}
-          disabled={!canAdd}
-          style={{ width: "100%" }}
-        >
-          + 項目を追加
-          <span
-            style={{
-              fontSize: "0.75rem",
-              color: "var(--color-text-muted)",
-              marginLeft: "0.25rem",
-            }}
-          >
-            ({items.length}/{MAX_LIST_ITEMS})
-          </span>
-        </button>
-      </div>
-    </div>
+      <button
+        type="button"
+        className="btn-secondary list-add"
+        onClick={handleAdd}
+        disabled={!canAdd}
+      >
+        + 項目を追加
+        <span className="list-add-count">
+          ({items.length}/{MAX_LIST_ITEMS})
+        </span>
+      </button>
+    </fieldset>
   );
 }

@@ -4,12 +4,12 @@ export const CHAR_LIMITS = {
   // 講師登録申請
   name: 15,
   age: 3,
-  discordId: 32,
-  xId: 15,
+  discordId: 33,
+  xId: 16,
   field: 30,
   fieldReason: 100,
-  achievement: 20,
-  selfAppeal: 200,
+  achievement: 30,
+  selfAppeal: 150,
   subjectName: 30,
   instructorName: 15,
   overview: 150,
@@ -20,7 +20,7 @@ export const CHAR_LIMITS = {
 
 // -- List limits --
 
-export const MAX_LIST_ITEMS = 5;
+export const MAX_LIST_ITEMS = 6;
 
 // -- Session count range --
 
@@ -37,7 +37,7 @@ export const PLACEHOLDERS = {
   instructor: {
     name: "例: tzug",
     age: "例: 18",
-    discordId: "例: username",
+    discordId: "例: #username",
     xId: "例: @username",
     field: "例: 情報工学，Arcaea",
     fieldReason:

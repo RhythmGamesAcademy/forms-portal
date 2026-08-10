@@ -4,8 +4,14 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { useMarkdown } from "@/lib/useMarkdown";
 
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Rendered only while the modal is open -- the parent controls visibility by
+ * mounting/unmounting, so all internal state starts fresh on every open.
+ */
 type PolicyModalProps = {
-  isOpen: boolean;
   onClose: () => void;
   onAgree: () => void;
   markdownPath: string;
@@ -13,7 +19,6 @@ type PolicyModalProps = {
 };
 
 export default function PolicyModal({
-  isOpen,
   onClose,
   onAgree,
   markdownPath,
@@ -26,73 +31,79 @@ export default function PolicyModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
+  // If content is very short and doesn't require scrolling, enable the button
   useEffect(() => {
-    if (isOpen) {
-      // If content is very short and doesn't require scrolling, we should enable the button
-      setTimeout(() => {
-        if (scrollRef.current) {
-          const { scrollHeight, clientHeight } = scrollRef.current;
-          if (scrollHeight <= clientHeight) {
-            setHasReachedBottom(true);
-          } else {
-            setHasReachedBottom(false);
-          }
+    const timer = window.setTimeout(() => {
+      if (scrollRef.current) {
+        const { scrollHeight, clientHeight } = scrollRef.current;
+        if (scrollHeight <= clientHeight) {
+          setHasReachedBottom(true);
         }
-      }, 100); // Wait a bit for render
-    }
-  }, [isOpen, content]);
+      }
+    }, 100); // Wait a bit for render
 
+    return () => window.clearTimeout(timer);
+  }, [content]);
+
+  // Prevent the page behind the modal from scrolling (notably on mobile)
   useEffect(() => {
-    if (isOpen) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-      const focusableElements = modalRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusableElements && focusableElements.length > 0) {
-        // Focus the first element (close button in header)
-        (focusableElements[0] as HTMLElement).focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  // Move focus into the modal on open, and hand it back on close
+  useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement;
+
+    const focusableElements = modalRef.current?.querySelectorAll(FOCUSABLE_SELECTOR);
+    if (focusableElements && focusableElements.length > 0) {
+      // Focus the first element (close button in header)
+      (focusableElements[0] as HTMLElement).focus();
+    }
+
+    return () => {
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
+    };
+  }, []);
+
+  // Esc to close, Tab to cycle within the modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
       }
 
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
-          onClose();
-          return;
-        }
+      if (e.key === "Tab" && modalRef.current) {
+        const elements = modalRef.current.querySelectorAll(FOCUSABLE_SELECTOR);
+        if (elements.length === 0) return;
+        const firstElement = elements[0] as HTMLElement;
+        const lastElement = elements[elements.length - 1] as HTMLElement;
 
-        if (e.key === "Tab" && modalRef.current) {
-          const elements = modalRef.current.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          if (elements.length === 0) return;
-          const firstElement = elements[0] as HTMLElement;
-          const lastElement = elements[elements.length - 1] as HTMLElement;
-
-          if (e.shiftKey) {
-            if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
-              lastElement.focus();
-              e.preventDefault();
-            }
-          } else {
-            if (document.activeElement === lastElement) {
-              firstElement.focus();
-              e.preventDefault();
-            }
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
           }
         }
-      };
-
-      document.addEventListener("keydown", handleKeyDown);
-      return () => {
-        document.removeEventListener("keydown", handleKeyDown);
-      };
-    } else {
-      if (previousFocusRef.current) {
-        previousFocusRef.current.focus();
-        previousFocusRef.current = null;
       }
-    }
-  }, [isOpen, onClose]);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -100,8 +111,6 @@ export default function PolicyModal({
       setHasReachedBottom(true);
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div
@@ -118,7 +127,7 @@ export default function PolicyModal({
         tabIndex={-1}
       >
         <div className="p-4 border-b border-[var(--color-border-modal-divider)] flex justify-between items-center bg-[var(--color-bg-modal-header)]">
-          <h2 id="policy-modal-title" className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-pink)] to-[var(--color-accent-purple)]">
+          <h2 id="policy-modal-title" className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-pink)] to-[var(--color-accent-lavender)]">
             {title}
           </h2>
           <button

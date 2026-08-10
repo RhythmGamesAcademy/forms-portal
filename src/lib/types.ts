@@ -8,10 +8,23 @@ export const DEPARTMENT_CATEGORIES: Record<Department, readonly string[]> = {
   "音ゲー実践学部": ["アーケード系", "モバイル系"],
 } as const;
 
+// -- Policy agreement fields --
+
+/**
+ * Boolean fields backed by a policy modal. Both forms extend this, so
+ * AgreementField and the actual form fields can never drift apart.
+ */
+export interface PolicyAgreements {
+  confirmPrivacyPolicy: boolean;
+  confirmRegulations: boolean;
+}
+
+export type AgreementField = keyof PolicyAgreements;
+
 // -- Instructor Registration Form --
 
 
-export interface InstructorFormData {
+export interface InstructorFormData extends PolicyAgreements {
   name: string;
   age: string;
   discordId: string;
@@ -23,8 +36,6 @@ export interface InstructorFormData {
   achievements: string[];
   selfAppeal: string;
   confirmNoFalsehood: boolean;
-  confirmPrivacyPolicy: boolean;
-  confirmRegulations: boolean;
 }
 
 export function createEmptyInstructorForm(): InstructorFormData {
@@ -47,7 +58,7 @@ export function createEmptyInstructorForm(): InstructorFormData {
 
 // -- Course Opening Form --
 
-export interface CourseFormData {
+export interface CourseFormData extends PolicyAgreements {
   subjectName: string;
   instructorName: string;
   department: Department | "";
@@ -58,8 +69,6 @@ export interface CourseFormData {
   approach: string;
   references: string;
   confirmNoFalsehood: boolean;
-  confirmPrivacyPolicy: boolean;
-  confirmRegulations: boolean;
 }
 
 export function createEmptyCourseForm(): CourseFormData {

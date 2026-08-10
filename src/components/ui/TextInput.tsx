@@ -35,7 +35,12 @@ export default function TextInput({
 }: TextInputProps) {
   const charCount = value.length;
   // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
+  // maxLength 属性で通常は超過しないが、ペースト・IME・プログラム的変更の
+  // 抜け道が残るため、検知とバリデーションは残す。
   const isOverLimit = maxLength ? charCount > maxLength : false;
+  const isAtLimit = maxLength ? charCount === maxLength : false;
+  // maxLength は type="number" では効かないため付けない
+  const domMaxLength = type === "number" ? undefined : maxLength;
 
   return (
     <div className="animate-fade-in">
@@ -55,6 +60,7 @@ export default function TextInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
+        maxLength={domMaxLength}
         aria-required={required}
         aria-invalid={isOverLimit}
         aria-describedby={maxLength ? `${id}-counter ${id}-error` : undefined}
@@ -66,8 +72,14 @@ export default function TextInput({
       />
       {maxLength && (
         <div className="flex justify-between items-center mt-1">
-          <div id={`${id}-error`} className="text-xs text-[var(--color-error)]" role="alert">
-            {isOverLimit && `${charCount - maxLength}文字超過しています`}
+          <div
+            id={`${id}-error`}
+            className={`text-xs ${isOverLimit ? "text-[var(--color-error)]" : "text-[var(--color-text-muted)]"}`}
+            aria-live="polite"
+          >
+            {isOverLimit
+              ? `${charCount - maxLength}文字超過しています`
+              : isAtLimit && "上限に達しました"}
           </div>
           <div id={`${id}-counter`} className={`char-counter !mt-0 ${isOverLimit ? "over-limit" : ""}`}>
             {charCount} / {maxLength}

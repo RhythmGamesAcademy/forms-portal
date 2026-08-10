@@ -33,7 +33,7 @@ export default function Home() {
             href="https://rhythmgamesacademy.github.io/website/ja"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent-purple)] transition-colors hidden sm:inline-block"
+            className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent-lavender)] transition-colors hidden sm:inline-block"
           >
             学園公式サイト ↗
           </a>

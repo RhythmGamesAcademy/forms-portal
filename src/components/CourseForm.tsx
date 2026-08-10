@@ -6,6 +6,7 @@ import TextArea from "./ui/TextArea";
 import SelectInput from "./ui/SelectInput";
 import ListInput from "./ui/ListInput";
 import AgreementSection from "./ui/AgreementSection";
+import SectionHeading from "./ui/SectionHeading";
 import CoursePngTemplate from "./png/CoursePngTemplate";
 import {
   type CourseFormData,
@@ -24,7 +25,7 @@ export default function CourseForm() {
   const templateRef = useRef<HTMLDivElement>(null);
 
   const { activeModalId, openModal, closeModal, handleCheckboxChange } = usePolicyAgreement({
-    onAgree: (field, value) => updateField(field as keyof CourseFormData, value as CourseFormData[keyof CourseFormData]),
+    onAgree: (field, value) => updateField(field, value),
   });
 
   // Field change helper
@@ -125,6 +126,8 @@ export default function CourseForm() {
   return (
     <div>
       <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+        <SectionHeading divider={false}>講義基本情報</SectionHeading>
+
         {/* Subject Name & Instructor Name */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextInput
@@ -171,6 +174,8 @@ export default function CourseForm() {
           />
         </div>
 
+        <SectionHeading>開講条件</SectionHeading>
+
         {/* Session Count & Credits (auto calculated) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           <div>
@@ -194,9 +199,7 @@ export default function CourseForm() {
           <div>
             <label className="form-label">
               単位数
-              <span className="badge-optional" style={{ backgroundColor: "rgba(52, 211, 153, 0.15)", color: "#34d399" }}>
-                自動算出
-              </span>
+              <span className="badge-auto">自動算出</span>
             </label>
             <div className="auto-value">
               {isSessionValid ? `${credits} 単位` : "- 単位"}
@@ -206,6 +209,8 @@ export default function CourseForm() {
             </div>
           </div>
         </div>
+
+        <SectionHeading>講義内容</SectionHeading>
 
         {/* Course Overview */}
         <TextArea
@@ -250,10 +255,7 @@ export default function CourseForm() {
           maxLength={CHAR_LIMITS.reference}
         />
 
-        <div className="section-heading-group">
-          <hr className="section-divider" />
-          <h3 className="section-heading">確認・同意</h3>
-        </div>
+        <SectionHeading>確認・同意</SectionHeading>
 
         <AgreementSection
           confirmNoFalsehood={formData.confirmNoFalsehood}
@@ -282,7 +284,7 @@ export default function CourseForm() {
           activeModalId={activeModalId}
           onModalClose={closeModal}
           onModalAgree={(field) => {
-            updateField(field as keyof CourseFormData, true as CourseFormData[keyof CourseFormData]);
+            updateField(field, true);
             closeModal();
           }}
           onCheckboxChange={handleCheckboxChange}

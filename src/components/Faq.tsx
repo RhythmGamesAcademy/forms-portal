@@ -52,7 +52,7 @@ export default function Faq() {
   return (
     <div className="mb-10 animate-fade-in">
       <div className="text-center sm:text-left mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-purple)] to-[var(--color-accent-pink)] mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-lavender)] to-[var(--color-accent-pink)] mb-2">
           よくある質問 (FAQ)
         </h2>
         <p className="text-sm text-[var(--color-text-secondary)]">
@@ -63,7 +63,7 @@ export default function Faq() {
       <div className="space-y-6">
         {Object.entries(groupedFaqs).map(([category, items]) => (
           <div key={category} className="card overflow-hidden">
-            <h3 className="border-l-4 border-[var(--color-accent-purple)] pl-3 text-[0.85rem] text-[var(--color-accent-purple)] mb-2 mt-6 font-bold">
+            <h3 className="border-l-4 border-[var(--color-accent-lavender)] pl-3 text-[0.85rem] text-[var(--color-accent-lavender)] mb-2 mt-6 font-bold">
               {category}
             </h3>
             <div className="divide-y divide-[var(--color-border)]">
@@ -81,7 +81,7 @@ export default function Faq() {
                         Q. {faq.question}
                       </span>
                       <span
-                        className={`text-[var(--color-accent-purple)] transition-transform duration-300 flex-shrink-0 mt-0.5 ${isOpen ? "rotate-180" : ""
+                        className={`text-[var(--color-accent-lavender)] transition-transform duration-300 flex-shrink-0 mt-0.5 ${isOpen ? "rotate-180" : ""
                           }`}
                       >
                         ▼
