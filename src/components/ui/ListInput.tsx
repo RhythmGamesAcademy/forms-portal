@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { MAX_LIST_ITEMS } from "@/lib/constants";
 
 interface ListInputProps {
   id: string;
@@ -10,7 +9,10 @@ interface ListInputProps {
   onChange: (items: string[]) => void;
   placeholder?: string;
   required?: boolean;
+  /** 1項目あたりの最大文字数 */
   maxLength?: number;
+  /** 追加できる項目数の上限。項目ごとに異なるため呼び出し側で指定する。 */
+  maxItems: number;
 }
 
 export default function ListInput({
@@ -21,8 +23,9 @@ export default function ListInput({
   placeholder,
   required = false,
   maxLength,
+  maxItems,
 }: ListInputProps) {
-  const canAdd = items.length < MAX_LIST_ITEMS;
+  const canAdd = items.length < maxItems;
   const [focusedIndex, setFocusedIndex] = React.useState<number | null>(null);
 
   const handleItemChange = (index: number, value: string) => {
@@ -122,7 +125,7 @@ export default function ListInput({
       >
         + 項目を追加
         <span className="list-add-count">
-          ({items.length}/{MAX_LIST_ITEMS})
+          ({items.length}/{maxItems})
         </span>
       </button>
     </fieldset>

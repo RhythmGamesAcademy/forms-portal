@@ -104,16 +104,20 @@ const InstructorPngTemplate = React.forwardRef<
         <div style={fieldValueStyle}>{data.fieldReason}</div>
       </div>
 
-      {/* Row 6: Achievements */}
+      {/* Row 6: Achievements (任意項目。未入力なら X ID と同じく "-" を出す) */}
       <div style={fieldGroupStyle}>
         <div style={fieldLabelStyle}>実績</div>
-        {data.achievements
-          .filter((a) => a.trim())
-          .map((achievement, idx) => (
+        {(() => {
+          const filled = data.achievements.filter((a) => a.trim());
+          if (filled.length === 0) {
+            return <div style={fieldValueStyle}>-</div>;
+          }
+          return filled.map((achievement, idx) => (
             <div key={`ach-${idx}`} style={listItemStyle}>
               {idx + 1}. {achievement}
             </div>
-          ))}
+          ));
+        })()}
       </div>
 
       {/* Row 7: Self appeal */}

@@ -15,7 +15,7 @@ import {
   DEPARTMENT_CATEGORIES,
   calculateCredits,
 } from "@/lib/types";
-import { CHAR_LIMITS, PLACEHOLDERS, SESSION_MIN, SESSION_MAX } from "@/lib/constants";
+import { CHAR_LIMITS, MAX_GOAL_ITEMS, PLACEHOLDERS, SESSION_MIN, SESSION_MAX } from "@/lib/constants";
 import { generatePng, formatDateForFilename, sanitizeFilename } from "@/lib/generatePng";
 import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
 
@@ -232,6 +232,7 @@ export default function CourseForm() {
           placeholder={PLACEHOLDERS.course.goal}
           required
           maxLength={CHAR_LIMITS.goal}
+          maxItems={MAX_GOAL_ITEMS}
         />
 
         {/* Approach / Policy */}

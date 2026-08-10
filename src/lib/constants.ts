@@ -19,8 +19,12 @@ export const CHAR_LIMITS = {
 } as const;
 
 // -- List limits --
+// 項目ごとに上限が異なるため、ListInput へ maxItems として個別に渡す。
 
-export const MAX_LIST_ITEMS = 6;
+/** 講師登録申請: 実績 */
+export const MAX_ACHIEVEMENT_ITEMS = 6;
+/** 講義開講申請: 受講者の到達目標 */
+export const MAX_GOAL_ITEMS = 3;
 
 // -- Session count range --
 
@@ -42,7 +46,7 @@ export const PLACEHOLDERS = {
     field: "例: 情報工学，Arcaea",
     fieldReason:
       "例: 音楽ゲームに対して情報工学の技術を用いたり，音楽ゲームの内部構造を解き明かしたりする楽しみを教えたいため．また，Arcaeaを情報学的視点から見るため．",
-    achievement: "例:「なし」，「基本情報技術者試験」，「Arcaea ポテンシャル12.71」",
+    achievement: "学位，資格，学業成績，レートなど",
     selfAppeal:
       "例: 工業系の学校で情報工学系の学科に所属しており現在3年生です．通算GPAが3.5，学科内順位が２位ですので相応の学力を有していると考えています．",
   },

@@ -14,7 +14,7 @@ import {
   DEPARTMENTS,
   DEPARTMENT_CATEGORIES,
 } from "@/lib/types";
-import { CHAR_LIMITS, PLACEHOLDERS } from "@/lib/constants";
+import { CHAR_LIMITS, MAX_ACHIEVEMENT_ITEMS, PLACEHOLDERS } from "@/lib/constants";
 import { generatePng, formatDateForFilename, sanitizeFilename } from "@/lib/generatePng";
 import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
 
@@ -83,10 +83,10 @@ export default function InstructorForm() {
       selfAppeal.trim() !== "" &&
       selfAppeal.length <= CHAR_LIMITS.selfAppeal;
 
-    const hasValidAchievements =
-      achievements.length > 0 &&
-      achievements.some((a) => a.trim() !== "") &&
-      achievements.filter(a => a.trim() !== "").every((a) => a.length <= CHAR_LIMITS.achievement);
+    // 実績は任意。未入力でも可だが、入力された項目は文字数制限を満たすこと。
+    const hasValidAchievements = achievements
+      .filter((a) => a.trim() !== "")
+      .every((a) => a.length <= CHAR_LIMITS.achievement);
 
     return (
       hasRequiredFields &&
@@ -224,8 +224,8 @@ export default function InstructorForm() {
           items={formData.achievements}
           onChange={(items) => updateField("achievements", items)}
           placeholder={PLACEHOLDERS.instructor.achievement}
-          required
           maxLength={CHAR_LIMITS.achievement}
+          maxItems={MAX_ACHIEVEMENT_ITEMS}
         />
 
         {/* Self Appeal */}
