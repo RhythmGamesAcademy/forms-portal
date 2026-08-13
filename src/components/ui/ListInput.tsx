@@ -62,8 +62,8 @@ export default function ListInput({
         {items.map((item, index) => {
           const charCount = item.length;
           // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
-          // maxLength 属性で通常は超過しないが、ペースト・IME・プログラム的変更の
-          // 抜け道が残るため、検知とバリデーションは残す。
+          // 推敲しながら書けるよう入力の切り捨て (DOM の maxLength) は行わず、
+          // 超過は赤ハイライトとバリデーションで知らせる。
           const isOverLimit = maxLength ? charCount > maxLength : false;
           const isAtLimit = maxLength ? charCount === maxLength : false;
 
@@ -80,7 +80,6 @@ export default function ListInput({
                   onFocus={() => setFocusedIndex(index)}
                   onBlur={() => setFocusedIndex(null)}
                   placeholder={placeholder}
-                  maxLength={maxLength}
                   aria-invalid={isOverLimit}
                   aria-describedby={maxLength ? `${id}-${index}-counter ${id}-${index}-error` : undefined}
                   autoComplete="off"

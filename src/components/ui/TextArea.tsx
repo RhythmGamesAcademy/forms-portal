@@ -26,8 +26,8 @@ export default function TextArea({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const charCount = value.length;
   // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
-  // maxLength 属性で通常は超過しないが、ペースト・IME・プログラム的変更の
-  // 抜け道が残るため、検知とバリデーションは残す。
+  // 推敲しながら書けるよう入力の切り捨て (DOM の maxLength) は行わず、
+  // 超過は赤ハイライトとバリデーションで知らせる。
   const isOverLimit = charCount > maxLength;
   const isAtLimit = charCount === maxLength;
 
@@ -58,7 +58,6 @@ export default function TextArea({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        maxLength={maxLength}
         aria-required={required}
         aria-invalid={isOverLimit}
         aria-describedby={`${id}-counter ${id}-error`}
