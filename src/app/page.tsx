@@ -18,9 +18,9 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/icon.png"
+              src="/rga-logo_w.svg"
               alt="音楽ゲーム学園 ロゴ"
-              className="w-9 h-9 rounded-md object-cover border border-[var(--color-border)]"
+              className="h-10 w-auto shrink-0"
             />
             <div>
               <h1 className="text-base font-bold tracking-wide text-[var(--color-text-primary)]">

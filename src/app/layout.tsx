@@ -18,7 +18,7 @@ const zenKurenaido = Zen_Kurenaido({
 
 export const metadata: Metadata = {
   title: "申請書作成アプリ | 音楽ゲーム学園",
-  description: "音楽ゲーム学園の講師登録申請書および講義開講申請書をブラウザ上で作成・ダウンロードできるWEBアプリケーションです。",
+  description: "音楽ゲーム学園の講師登録申請書および講義開講申請書をブラウザ上で作成・ダウンロードできるWEBアプリケーション。",
 };
 
 export default function RootLayout({

@@ -16,7 +16,7 @@ interface PngTemplateProps {
  * - Document title
  * - Application date (auto-filled)
  * - Watermark layer
- * - Logo + academy name in bottom-left
+ * - Academy logo in bottom-left
  *
  * Layer order: Background (white) -> Watermark -> Content
  */
@@ -88,7 +88,7 @@ const PngTemplate = React.forwardRef<HTMLDivElement, PngTemplateProps>(
           {children}
         </div>
 
-        {/* Footer: Logo + Academy name */}
+        {/* Footer: Logo */}
         <div
           style={{
             position: "absolute",
@@ -96,30 +96,18 @@ const PngTemplate = React.forwardRef<HTMLDivElement, PngTemplateProps>(
             left: "48px",
             display: "flex",
             alignItems: "center",
-            gap: "10px",
             zIndex: 2,
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/icon.png"
-            alt="Logo"
+            src="/ongakugamegakuen-logo_b.svg"
+            alt="音楽ゲーム学園"
             style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "4px",
+              height: "72px",
+              width: "auto",
             }}
           />
-          <span
-            style={{
-              fontSize: "13px",
-              fontWeight: 600,
-              color: "#666666",
-              letterSpacing: "0.1em",
-            }}
-          >
-            音楽ゲーム学園
-          </span>
         </div>
       </div>
     );
