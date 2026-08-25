@@ -5,7 +5,7 @@ export type Department = (typeof DEPARTMENTS)[number];
 
 export const DEPARTMENT_CATEGORIES: Record<Department, readonly string[]> = {
   "音ゲー基礎学部": ["文理系", "創作系"],
-  "音ゲー実践学部": ["アーケード系", "モバイル系"],
+  "音ゲー実践学部": ["アーケード系", "スタンドアロン系", "モバイル系"],
 } as const;
 
 // -- Policy agreement fields --
