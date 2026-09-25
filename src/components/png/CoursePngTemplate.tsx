@@ -4,6 +4,7 @@ import React from "react";
 import PngTemplate from "./PngTemplate";
 import type { CourseFormData } from "@/lib/types";
 import { calculateCredits } from "@/lib/types";
+import { formatOfferingForPng } from "@/lib/academicPeriod";
 
 /**
  * Shared styles for the PNG document fields
@@ -49,18 +50,20 @@ const listItemStyle: React.CSSProperties = {
 
 interface CoursePngTemplateProps {
   data: CourseFormData;
+  generatedAt?: Date;
+  termNumber?: number;
 }
 
 const CoursePngTemplate = React.forwardRef<
   HTMLDivElement,
   CoursePngTemplateProps
->(function CoursePngTemplate({ data }, ref) {
+>(function CoursePngTemplate({ data, generatedAt, termNumber }, ref) {
   const sessionCount =
     typeof data.sessionCount === "number" ? data.sessionCount : 0;
   const credits = calculateCredits(sessionCount);
 
   return (
-    <PngTemplate ref={ref} title="講義開講申請書">
+    <PngTemplate ref={ref} title="講義開講申請書" generatedAt={generatedAt}>
       {/* Row 1: Subject / Instructor */}
       <div style={twoColGrid}>
         <div style={fieldGroupStyle}>
@@ -85,7 +88,17 @@ const CoursePngTemplate = React.forwardRef<
         </div>
       </div>
 
-      {/* Row 3: Sessions / Credits */}
+      {/* Row 3: Offering type */}
+      <div style={fieldGroupStyle}>
+        <div style={fieldLabelStyle}>開講時期</div>
+        <div style={fieldValueStyle}>
+          {data.offeringType && termNumber
+            ? formatOfferingForPng(data.offeringType, termNumber)
+            : ""}
+        </div>
+      </div>
+
+      {/* Row 4: Sessions / Credits */}
       <div style={twoColGrid}>
         <div style={fieldGroupStyle}>
           <div style={fieldLabelStyle}>講義回数</div>
@@ -97,13 +110,13 @@ const CoursePngTemplate = React.forwardRef<
         </div>
       </div>
 
-      {/* Row 4: Overview */}
+      {/* Row 5: Overview */}
       <div style={fieldGroupStyle}>
         <div style={fieldLabelStyle}>講義概要</div>
         <div style={fieldValueStyle}>{data.overview}</div>
       </div>
 
-      {/* Row 5: Goals */}
+      {/* Row 6: Goals */}
       <div style={fieldGroupStyle}>
         <div style={fieldLabelStyle}>受講者の到達目標</div>
         {data.goals
@@ -115,13 +128,13 @@ const CoursePngTemplate = React.forwardRef<
           ))}
       </div>
 
-      {/* Row 6: Approach */}
+      {/* Row 7: Approach */}
       <div style={fieldGroupStyle}>
         <div style={fieldLabelStyle}>講義の進め方・方針</div>
         <div style={fieldValueStyle}>{data.approach}</div>
       </div>
 
-      {/* Row 7: References (optional) */}
+      {/* Row 8: References (optional) */}
       {data.references && (
         <div style={fieldGroupStyle}>
           <div style={fieldLabelStyle}>参考文献など</div>

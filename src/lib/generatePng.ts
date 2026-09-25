@@ -1,5 +1,6 @@
 import html2canvas from "html2canvas";
 import { FILENAME_FALLBACK } from "./constants";
+import { formatTokyoDate } from "./japanTime";
 
 /**
  * Sanitize a string for safe use in filenames.
@@ -72,23 +73,15 @@ export async function generatePng(
 }
 
 /**
- * Format today's date as YYYY/MM/DD for display in the document.
+ * Format a date as YYYY/MM/DD in Japan time for display in the document.
  */
-export function formatDate(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}/${m}/${d}`;
+export function formatDate(date: Date = new Date()): string {
+  return formatTokyoDate(date, "/");
 }
 
 /**
- * Format today's date as YYYYMMDD for filenames.
+ * Format a date as YYYYMMDD in Japan time for filenames.
  */
-export function formatDateForFilename(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}${m}${d}`;
+export function formatDateForFilename(date: Date = new Date()): string {
+  return formatTokyoDate(date, "");
 }

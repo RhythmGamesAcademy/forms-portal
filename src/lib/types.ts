@@ -3,6 +3,9 @@
 export const DEPARTMENTS = ["音ゲー基礎学部", "音ゲー実践学部"] as const;
 export type Department = (typeof DEPARTMENTS)[number];
 
+export const COURSE_OFFERING_TYPES = ["当期講義", "通期講義"] as const;
+export type CourseOfferingType = (typeof COURSE_OFFERING_TYPES)[number];
+
 export const DEPARTMENT_CATEGORIES: Record<Department, readonly string[]> = {
   "音ゲー基礎学部": ["文理系", "創作系"],
   "音ゲー実践学部": ["アーケード系", "スタンドアロン系", "モバイル系"],
@@ -63,6 +66,7 @@ export interface CourseFormData extends PolicyAgreements {
   instructorName: string;
   department: Department | "";
   courseCategory: string;
+  offeringType: CourseOfferingType | "";
   sessionCount: number | "";
   overview: string;
   goals: string[];
@@ -77,6 +81,7 @@ export function createEmptyCourseForm(): CourseFormData {
     instructorName: "",
     department: "",
     courseCategory: "",
+    offeringType: "",
     sessionCount: "",
     overview: "",
     goals: [""],

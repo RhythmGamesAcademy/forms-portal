@@ -7,6 +7,7 @@ import SelectInput from "./ui/SelectInput";
 import ListInput from "./ui/ListInput";
 import AgreementSection from "./ui/AgreementSection";
 import SectionHeading from "./ui/SectionHeading";
+import DraftActions, { type DraftNotice } from "./ui/DraftActions";
 import InstructorPngTemplate from "./png/InstructorPngTemplate";
 import {
   type InstructorFormData,
@@ -14,14 +15,59 @@ import {
   DEPARTMENTS,
   DEPARTMENT_CATEGORIES,
 } from "@/lib/types";
-import { CHAR_LIMITS, MAX_ACHIEVEMENT_ITEMS, PLACEHOLDERS } from "@/lib/constants";
+import {
+  CHAR_LIMITS,
+  MAX_ACHIEVEMENT_ITEMS,
+  PLACEHOLDERS,
+} from "@/lib/constants";
 import { generatePng, formatDateForFilename, sanitizeFilename } from "@/lib/generatePng";
+import {
+  createInstructorDraft,
+  INSTRUCTOR_DRAFT_KEY,
+  parseInstructorDraft,
+} from "@/lib/formDrafts";
+import {
+  deleteLocalDraft,
+  readLocalDraft,
+  writeLocalDraft,
+} from "@/lib/localDraft";
 import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
 
 export default function InstructorForm() {
   const [formData, setFormData] = useState<InstructorFormData>(createEmptyInstructorForm());
   const [isGenerating, setIsGenerating] = useState(false);
+  const [draftNotice, setDraftNotice] = useState<DraftNotice | null>(null);
   const templateRef = useRef<HTMLDivElement>(null);
+  const hasUserEditedRef = useRef(false);
+
+  React.useEffect(() => {
+    if (hasUserEditedRef.current) return;
+
+    const result = readLocalDraft(
+      INSTRUCTOR_DRAFT_KEY,
+      "instructor",
+      parseInstructorDraft
+    );
+
+    if (result.status === "loaded") {
+      setFormData({ ...createEmptyInstructorForm(), ...result.data });
+      setDraftNotice({
+        kind: "info",
+        message: "保存済みの下書きを復元しました。確認・同意項目は再度確認してください。",
+      });
+    } else if (result.status === "invalid") {
+      setDraftNotice({
+        kind: "error",
+        message:
+          "保存済みの下書きを読み込めませんでした。データが破損しているか、現在のフォーム形式と異なる可能性があります。下書きは削除せず残しています。",
+      });
+    } else if (result.status === "unavailable") {
+      setDraftNotice({
+        kind: "error",
+        message: "ブラウザの保存領域を利用できないため、下書きを読み込めませんでした。",
+      });
+    }
+  }, []);
 
   const { activeModalId, openModal, closeModal, handleCheckboxChange } = usePolicyAgreement({
     onAgree: (field, value) => updateField(field, value),
@@ -29,6 +75,8 @@ export default function InstructorForm() {
 
   // Field change helpers
   const updateField = <K extends keyof InstructorFormData>(key: K, value: InstructorFormData[K]) => {
+    hasUserEditedRef.current = true;
+    setDraftNotice(null);
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -41,11 +89,61 @@ export default function InstructorForm() {
 
   // Handle department change with cascading reset of courseCategory
   const handleDepartmentChange = (dept: string) => {
+    hasUserEditedRef.current = true;
+    setDraftNotice(null);
     setFormData((prev) => ({
       ...prev,
       department: dept as InstructorFormData["department"],
       courseCategory: "",
     }));
+  };
+
+  const handleSaveDraft = () => {
+    hasUserEditedRef.current = true;
+    const draftData = createInstructorDraft(formData);
+    if (parseInstructorDraft(draftData) === null) {
+      setDraftNotice({
+        kind: "error",
+        message:
+          "入力内容が下書きの保存可能な形式を超えています。入力内容を確認してください。既存の下書きは削除していません。",
+      });
+      return;
+    }
+
+    const saved = writeLocalDraft(
+      INSTRUCTOR_DRAFT_KEY,
+      "instructor",
+      draftData
+    );
+
+    setDraftNotice(
+      saved
+        ? {
+            kind: "success",
+            message: "下書きを保存しました。このブラウザに保存されています。",
+          }
+        : {
+            kind: "error",
+            message:
+              "下書きを保存できませんでした。ブラウザの設定や保存容量をご確認ください。既存の下書きは削除していません。",
+          }
+    );
+  };
+
+  const handleDeleteDraft = () => {
+    hasUserEditedRef.current = true;
+    const deleted = deleteLocalDraft(INSTRUCTOR_DRAFT_KEY);
+    setDraftNotice(
+      deleted
+        ? {
+            kind: "success",
+            message: "保存済みの下書きを削除しました。入力中の内容は保持されています。",
+          }
+        : {
+            kind: "error",
+            message: "下書きを削除できませんでした。ブラウザの設定をご確認ください。",
+          }
+    );
   };
 
   // Validation: check if form is valid and generation button should be enabled
@@ -276,7 +374,12 @@ export default function InstructorForm() {
         />
 
         {/* Generate Button */}
-        <div className="pt-2">
+        <div className="pt-2 space-y-4">
+          <DraftActions
+            notice={draftNotice}
+            onSave={handleSaveDraft}
+            onDelete={handleDeleteDraft}
+          />
           <button
             type="button"
             className="btn-primary"

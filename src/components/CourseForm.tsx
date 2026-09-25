@@ -1,28 +1,116 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { flushSync } from "react-dom";
 import TextInput from "./ui/TextInput";
 import TextArea from "./ui/TextArea";
 import SelectInput from "./ui/SelectInput";
 import ListInput from "./ui/ListInput";
 import AgreementSection from "./ui/AgreementSection";
 import SectionHeading from "./ui/SectionHeading";
+import DraftActions, { type DraftNotice } from "./ui/DraftActions";
 import CoursePngTemplate from "./png/CoursePngTemplate";
 import {
   type CourseFormData,
   createEmptyCourseForm,
   DEPARTMENTS,
   DEPARTMENT_CATEGORIES,
+  COURSE_OFFERING_TYPES,
   calculateCredits,
 } from "@/lib/types";
-import { CHAR_LIMITS, MAX_GOAL_ITEMS, PLACEHOLDERS, SESSION_MIN, SESSION_MAX } from "@/lib/constants";
+import {
+  CHAR_LIMITS,
+  MAX_GOAL_ITEMS,
+  PLACEHOLDERS,
+  SESSION_MIN,
+  SESSION_MAX,
+} from "@/lib/constants";
 import { generatePng, formatDateForFilename, sanitizeFilename } from "@/lib/generatePng";
+import {
+  formatOfferingForPng,
+  getAcademicTermNumber,
+  getNextAcademicTermBoundary,
+} from "@/lib/academicPeriod";
+import {
+  COURSE_DRAFT_KEY,
+  createCourseDraft,
+  parseCourseDraft,
+} from "@/lib/formDrafts";
+import {
+  deleteLocalDraft,
+  readLocalDraft,
+  writeLocalDraft,
+} from "@/lib/localDraft";
 import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
 
 export default function CourseForm() {
   const [formData, setFormData] = useState<CourseFormData>(createEmptyCourseForm());
   const [isGenerating, setIsGenerating] = useState(false);
+  const [currentTerm, setCurrentTerm] = useState<number | null>(null);
+  const [draftNotice, setDraftNotice] = useState<DraftNotice | null>(null);
+  const [pngSnapshot, setPngSnapshot] = useState<{
+    generatedAt: Date;
+    termNumber: number;
+  } | null>(null);
   const templateRef = useRef<HTMLDivElement>(null);
+  const hasUserEditedRef = useRef(false);
+
+  React.useEffect(() => {
+    if (hasUserEditedRef.current) return;
+
+    const result = readLocalDraft(COURSE_DRAFT_KEY, "course", parseCourseDraft);
+
+    if (result.status === "loaded") {
+      setFormData({ ...createEmptyCourseForm(), ...result.data });
+      setDraftNotice({
+        kind: "info",
+        message: "保存済みの下書きを復元しました。確認・同意項目は再度確認してください。",
+      });
+    } else if (result.status === "invalid") {
+      setDraftNotice({
+        kind: "error",
+        message:
+          "保存済みの下書きを読み込めませんでした。データが破損しているか、現在のフォーム形式と異なる可能性があります。下書きは削除せず残しています。",
+      });
+    } else if (result.status === "unavailable") {
+      setDraftNotice({
+        kind: "error",
+        message: "ブラウザの保存領域を利用できないため、下書きを読み込めませんでした。",
+      });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    let timer: number | undefined;
+
+    const refreshTerm = () => {
+      const now = new Date();
+      setCurrentTerm(getAcademicTermNumber(now));
+
+      const nextBoundary = getNextAcademicTermBoundary(now);
+      const untilBoundary = nextBoundary.getTime() - now.getTime();
+      // Long waits are checked hourly so browser timer limits cannot skip a boundary.
+      const delay = Math.min(Math.max(untilBoundary + 20, 20), 60 * 60 * 1000);
+      timer = window.setTimeout(refreshTerm, delay);
+    };
+
+    const refreshWhenVisible = () => {
+      if (!document.hidden) {
+        if (timer !== undefined) window.clearTimeout(timer);
+        refreshTerm();
+      }
+    };
+
+    refreshTerm();
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, []);
 
   const { activeModalId, openModal, closeModal, handleCheckboxChange } = usePolicyAgreement({
     onAgree: (field, value) => updateField(field, value),
@@ -30,11 +118,15 @@ export default function CourseForm() {
 
   // Field change helper
   const updateField = <K extends keyof CourseFormData>(key: K, value: CourseFormData[K]) => {
+    hasUserEditedRef.current = true;
+    setDraftNotice(null);
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   // Handle department change with cascading reset of courseCategory
   const handleDepartmentChange = (dept: string) => {
+    hasUserEditedRef.current = true;
+    setDraftNotice(null);
     setFormData((prev) => ({
       ...prev,
       department: dept as CourseFormData["department"],
@@ -66,6 +158,7 @@ export default function CourseForm() {
       instructorName,
       department,
       courseCategory,
+      offeringType,
       overview,
       goals,
       approach,
@@ -82,6 +175,7 @@ export default function CourseForm() {
       instructorName.length <= CHAR_LIMITS.instructorName &&
       department !== "" &&
       courseCategory !== "" &&
+      offeringType !== "" &&
       isSessionValid &&
       overview.trim() !== "" &&
       overview.length <= CHAR_LIMITS.overview &&
@@ -103,19 +197,81 @@ export default function CourseForm() {
     );
   }, [formData, isSessionValid]);
 
+  const handleSaveDraft = () => {
+    hasUserEditedRef.current = true;
+    const draftData = createCourseDraft(formData);
+    if (parseCourseDraft(draftData) === null) {
+      setDraftNotice({
+        kind: "error",
+        message:
+          "入力内容が下書きの保存可能な形式を超えています。入力内容を確認してください。既存の下書きは削除していません。",
+      });
+      return;
+    }
+
+    const saved = writeLocalDraft(
+      COURSE_DRAFT_KEY,
+      "course",
+      draftData
+    );
+
+    setDraftNotice(
+      saved
+        ? {
+            kind: "success",
+            message: "下書きを保存しました。このブラウザに保存されています。",
+          }
+        : {
+            kind: "error",
+            message:
+              "下書きを保存できませんでした。ブラウザの設定や保存容量をご確認ください。既存の下書きは削除していません。",
+          }
+    );
+  };
+
+  const handleDeleteDraft = () => {
+    hasUserEditedRef.current = true;
+    const deleted = deleteLocalDraft(COURSE_DRAFT_KEY);
+    setDraftNotice(
+      deleted
+        ? {
+            kind: "success",
+            message: "保存済みの下書きを削除しました。入力中の内容は保持されています。",
+          }
+        : {
+            kind: "error",
+            message: "下書きを削除できませんでした。ブラウザの設定をご確認ください。",
+          }
+    );
+  };
+
   // Handle PNG generation
   const handleGenerate = async () => {
     if (!isFormValid || !templateRef.current || isGenerating) return;
 
+    const generatedAt = new Date();
+    const termNumber = getAcademicTermNumber(generatedAt);
+    if (termNumber === null) return;
+
     try {
-      setIsGenerating(true);
-      const filename = `講義開講申請書_${sanitizeFilename(formData.subjectName)}_${formatDateForFilename()}.png`;
+      flushSync(() => {
+        setCurrentTerm(termNumber);
+        setPngSnapshot({ generatedAt, termNumber });
+        setIsGenerating(true);
+      });
+
+      const filename = `講義開講申請書_${sanitizeFilename(
+        formData.subjectName
+      )}_${formatDateForFilename(generatedAt)}.png`;
       await generatePng(templateRef.current, filename);
     } catch (err) {
       console.error("PNG generation error:", err);
       alert("PNGの生成に失敗しました。もう一度お試しください。");
     } finally {
-      setIsGenerating(false);
+      flushSync(() => {
+        setPngSnapshot(null);
+        setIsGenerating(false);
+      });
     }
   };
 
@@ -175,6 +331,28 @@ export default function CourseForm() {
         </div>
 
         <SectionHeading>開講条件</SectionHeading>
+
+        <div className="max-w-xl">
+          <SelectInput
+            id="course-offering-type"
+            label="開講時期"
+            value={formData.offeringType}
+            onChange={(val) =>
+              updateField("offeringType", val as CourseFormData["offeringType"])
+            }
+            options={COURSE_OFFERING_TYPES}
+            required
+          />
+          <p className="mt-2 text-sm text-[var(--color-text-muted)]" aria-live="polite">
+            {currentTerm === null
+              ? formData.offeringType
+                ? `選択結果: ${formData.offeringType}（対象期は2026年8月1日以降に確定）`
+                : "対象期は2026年8月1日以降に表示されます。"
+              : formData.offeringType
+                ? `PNGへの印字: ${formatOfferingForPng(formData.offeringType, currentTerm)}`
+                : `対象期: #${currentTerm}期（開講時期を選択するとPNGへの印字を確認できます）`}
+          </p>
+        </div>
 
         {/* Session Count & Credits (auto calculated) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
@@ -293,11 +471,16 @@ export default function CourseForm() {
         />
 
         {/* Generate Button */}
-        <div className="pt-2">
+        <div className="pt-2 space-y-4">
+          <DraftActions
+            notice={draftNotice}
+            onSave={handleSaveDraft}
+            onDelete={handleDeleteDraft}
+          />
           <button
             type="button"
             className="btn-primary"
-            disabled={!isFormValid || isGenerating}
+            disabled={!isFormValid || currentTerm === null || isGenerating}
             onClick={handleGenerate}
           >
             {isGenerating ? (
@@ -313,7 +496,12 @@ export default function CourseForm() {
       </form>
 
       {/* Hidden DOM element for PNG rendering */}
-      <CoursePngTemplate ref={templateRef} data={formData} />
+      <CoursePngTemplate
+        ref={templateRef}
+        data={formData}
+        generatedAt={pngSnapshot?.generatedAt}
+        termNumber={pngSnapshot?.termNumber}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/generatePng";
 interface PngTemplateProps {
   title: string;
   children: React.ReactNode;
+  generatedAt?: Date;
 }
 
 /**
@@ -14,15 +15,15 @@ interface PngTemplateProps {
  * Provides:
  * - White background
  * - Document title
- * - Application date (auto-filled)
+ * - PNG creation date (auto-filled)
  * - Watermark layer
  * - Academy logo in bottom-left
  *
  * Layer order: Background (white) -> Watermark -> Content
  */
 const PngTemplate = React.forwardRef<HTMLDivElement, PngTemplateProps>(
-  function PngTemplate({ title, children }, ref) {
-    const today = formatDate();
+  function PngTemplate({ title, children, generatedAt }, ref) {
+    const today = formatDate(generatedAt);
 
     return (
       <div
@@ -50,7 +51,7 @@ const PngTemplate = React.forwardRef<HTMLDivElement, PngTemplateProps>(
             padding: "48px 48px 80px",
           }}
         >
-          {/* Header: Title + Date */}
+          {/* Header: Title + PNG creation date */}
           <div
             style={{
               display: "flex",
@@ -77,7 +78,7 @@ const PngTemplate = React.forwardRef<HTMLDivElement, PngTemplateProps>(
                 textAlign: "right",
               }}
             >
-              <div>申請日</div>
+              <div>PNG作成日</div>
               <div style={{ fontWeight: 600, fontSize: "14px", color: "#1a1a1a" }}>
                 {today}
               </div>
