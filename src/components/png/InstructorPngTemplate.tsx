@@ -3,6 +3,7 @@
 import React from "react";
 import PngTemplate from "./PngTemplate";
 import type { InstructorFormData } from "@/lib/types";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * Shared styles for the PNG document fields
@@ -53,17 +54,18 @@ interface InstructorPngTemplateProps {
 const InstructorPngTemplate = React.forwardRef<
   HTMLDivElement,
   InstructorPngTemplateProps
->(function InstructorPngTemplate({ data }, ref) {
+  >(function InstructorPngTemplate({ data }, ref) {
+  const { t } = useLocale();
   return (
-    <PngTemplate ref={ref} title="講師登録申請書">
+    <PngTemplate ref={ref} title={t("講師登録申請書")}>
       {/* Row 1: Name / Age */}
       <div style={twoColGrid}>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>講師名</div>
+          <div style={fieldLabelStyle}>{t("講師名")}</div>
           <div style={fieldValueStyle}>{data.name}</div>
         </div>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>年齢</div>
+          <div style={fieldLabelStyle}>{t("年齢")}</div>
           <div style={fieldValueStyle}>{data.age}</div>
         </div>
       </div>
@@ -82,31 +84,31 @@ const InstructorPngTemplate = React.forwardRef<
 
       {/* Row 3: Field */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>担当分野</div>
+        <div style={fieldLabelStyle}>{t("担当分野")}</div>
         <div style={fieldValueStyle}>{data.field}</div>
       </div>
 
       {/* Row 4: Department / Category */}
       <div style={twoColGrid}>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>担当学部</div>
-          <div style={fieldValueStyle}>{data.department}</div>
+          <div style={fieldLabelStyle}>{t("担当学部")}</div>
+          <div style={fieldValueStyle}>{data.department && t(data.department)}</div>
         </div>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>講義区分</div>
-          <div style={fieldValueStyle}>{data.courseCategory}</div>
+          <div style={fieldLabelStyle}>{t("講義区分")}</div>
+          <div style={fieldValueStyle}>{data.courseCategory && t(data.courseCategory)}</div>
         </div>
       </div>
 
       {/* Row 5: Field reason */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>担当分野の選定理由</div>
+        <div style={fieldLabelStyle}>{t("担当分野の選定理由")}</div>
         <div style={fieldValueStyle}>{data.fieldReason}</div>
       </div>
 
       {/* Row 6: Achievements (任意項目。未入力なら X ID と同じく "-" を出す) */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>実績</div>
+        <div style={fieldLabelStyle}>{t("実績")}</div>
         {(() => {
           const filled = data.achievements.filter((a) => a.trim());
           if (filled.length === 0) {
@@ -122,7 +124,7 @@ const InstructorPngTemplate = React.forwardRef<
 
       {/* Row 7: Self appeal */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>自己アピール</div>
+        <div style={fieldLabelStyle}>{t("自己アピール")}</div>
         <div style={fieldValueStyle}>{data.selfAppeal}</div>
       </div>
     </PngTemplate>

@@ -4,11 +4,14 @@ import React, { useState } from "react";
 import InstructorForm from "@/components/InstructorForm";
 import CourseForm from "@/components/CourseForm";
 import Faq from "@/components/Faq";
+import { useLocale, type Locale } from "@/lib/i18n";
+
 
 type TabType = "instructor" | "course";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("instructor");
+  const { locale, setLocale, t } = useLocale();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -19,24 +22,29 @@ export default function Home() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/rga-logo_w.svg"
-              alt="音楽ゲーム学園 ロゴ"
+              alt={t("音楽ゲーム学園 ロゴ")}
               className="h-10 w-auto shrink-0"
             />
             <div>
               <h1 className="text-base font-bold tracking-wide text-[var(--color-text-primary)]">
-                音楽ゲーム学園
+                {t("音楽ゲーム学園")}
               </h1>
-              <p className="text-xs text-[var(--color-text-secondary)]">申請書作成ポータル</p>
+              <p className="text-xs text-[var(--color-text-secondary)]">{t("申請書作成ポータル")}</p>
             </div>
           </div>
-          <a
-            href="https://rhythmgamesacademy.github.io/website/ja"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent-lavender)] transition-colors hidden sm:inline-block"
+          <label className="sr-only" htmlFor="locale-select">
+            {t("言語")}
+          </label>
+          <select
+            id="locale-select"
+            value={locale}
+            onChange={(event) => setLocale(event.target.value as Locale)}
+            className="form-input form-select !w-auto !py-2 !text-xs"
+            aria-label={t("言語")}
           >
-            学園公式サイト ↗
-          </a>
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+          </select>
         </div>
       </header>
 
@@ -45,11 +53,11 @@ export default function Home() {
         {/* Intro */}
         <div className="mb-6 text-center sm:text-left">
           <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] mb-2">
-            申請書作成
+            {t("申請書作成")}
           </h2>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            必要事項を入力し、「申請書PNGをダウンロード」ボタンを押すとA4風の申請書画像を生成できます。<br />
-            生成後は所定の手続きに従って運営へ提出してください。
+            {t("必要事項を入力し、「申請書PNGをダウンロード」ボタンを押すとA4風の申請書画像を生成できます。")}<br />
+            {t("生成後は所定の手続きに従って運営へ提出してください。")}
           </p>
         </div>
 
@@ -59,7 +67,7 @@ export default function Home() {
           <div
             className="tab-container"
             role="tablist"
-            aria-label="申請種別"
+            aria-label={t("申請種別")}
             onKeyDown={(e) => {
               if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
                 e.preventDefault();
@@ -82,7 +90,7 @@ export default function Home() {
               className={`tab-button ${activeTab === "instructor" ? "active" : ""}`}
               onClick={() => setActiveTab("instructor")}
             >
-              講師登録申請
+              {t("講師登録申請")}
             </button>
             <button
               id="tab-course"
@@ -94,7 +102,7 @@ export default function Home() {
               className={`tab-button ${activeTab === "course" ? "active" : ""}`}
               onClick={() => setActiveTab("course")}
             >
-              講義開講申請
+              {t("講義開講申請")}
             </button>
           </div>
 
@@ -126,7 +134,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-[var(--color-border)] py-6 text-center text-xs text-[var(--color-text-muted)]">
-        <p>&copy; {new Date().getFullYear()} 音楽ゲーム学園 All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} {t("音楽ゲーム学園")} All rights reserved.</p>
       </footer>
     </div>
   );

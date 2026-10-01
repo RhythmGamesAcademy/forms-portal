@@ -5,29 +5,30 @@ import PngTemplate from "./PngTemplate";
 import type { CourseFormData } from "@/lib/types";
 import { calculateCredits } from "@/lib/types";
 import { formatOfferingForPng } from "@/lib/academicPeriod";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * Shared styles for the PNG document fields
  */
 const fieldGroupStyle: React.CSSProperties = {
-  marginBottom: "16px",
+  marginBottom: "9px",
 };
 
 const fieldLabelStyle: React.CSSProperties = {
-  fontSize: "11px",
+  fontSize: "10px",
   color: "#888888",
-  marginBottom: "4px",
+  marginBottom: "2px",
   fontWeight: 600,
   letterSpacing: "0.05em",
 };
 
 const fieldValueStyle: React.CSSProperties = {
-  fontSize: "14px",
-  lineHeight: "1.6",
-  padding: "10px 14px",
-  border: "1.5px solid #cccccc",
-  borderRadius: "8px",
-  minHeight: "36px",
+  fontSize: "12px",
+  lineHeight: "1.35",
+  padding: "6px 9px",
+  border: "1px solid #cccccc",
+  borderRadius: "6px",
+  minHeight: "28px",
   wordBreak: "break-word" as const,
   whiteSpace: "pre-wrap" as const,
 };
@@ -35,16 +36,16 @@ const fieldValueStyle: React.CSSProperties = {
 const twoColGrid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
-  gap: "16px",
+  gap: "10px",
 };
 
 const listItemStyle: React.CSSProperties = {
-  fontSize: "14px",
-  lineHeight: "1.6",
-  padding: "8px 14px",
-  border: "1.5px solid #cccccc",
-  borderRadius: "8px",
-  marginBottom: "6px",
+  fontSize: "11px",
+  lineHeight: "1.3",
+  padding: "5px 8px",
+  border: "1px solid #cccccc",
+  borderRadius: "6px",
+  marginBottom: "0",
   wordBreak: "break-word" as const,
 };
 
@@ -58,20 +59,21 @@ const CoursePngTemplate = React.forwardRef<
   HTMLDivElement,
   CoursePngTemplateProps
 >(function CoursePngTemplate({ data, generatedAt, termNumber }, ref) {
+  const { locale, t } = useLocale();
   const sessionCount =
     typeof data.sessionCount === "number" ? data.sessionCount : 0;
   const credits = calculateCredits(sessionCount);
 
   return (
-    <PngTemplate ref={ref} title="講義開講申請書" generatedAt={generatedAt}>
+    <PngTemplate ref={ref} title={t("講義開講申請書")} generatedAt={generatedAt}>
       {/* Row 1: Subject / Instructor */}
       <div style={twoColGrid}>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>科目名</div>
+          <div style={fieldLabelStyle}>{t("科目名")}</div>
           <div style={fieldValueStyle}>{data.subjectName}</div>
         </div>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>担当講師</div>
+          <div style={fieldLabelStyle}>{t("担当講師")}</div>
           <div style={fieldValueStyle}>{data.instructorName}</div>
         </div>
       </div>
@@ -79,46 +81,48 @@ const CoursePngTemplate = React.forwardRef<
       {/* Row 2: Department / Category */}
       <div style={twoColGrid}>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>対象学部</div>
-          <div style={fieldValueStyle}>{data.department}</div>
+          <div style={fieldLabelStyle}>{t("対象学部")}</div>
+          <div style={fieldValueStyle}>{data.department && t(data.department)}</div>
         </div>
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>講義区分</div>
-          <div style={fieldValueStyle}>{data.courseCategory}</div>
+          <div style={fieldLabelStyle}>{t("講義区分")}</div>
+          <div style={fieldValueStyle}>{data.courseCategory && t(data.courseCategory)}</div>
         </div>
       </div>
 
       {/* Row 3: Offering type */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>開講時期</div>
+        <div style={fieldLabelStyle}>{t("開講時期")}</div>
         <div style={fieldValueStyle}>
           {data.offeringType && termNumber
-            ? formatOfferingForPng(data.offeringType, termNumber)
+            ? formatOfferingForPng(data.offeringType, termNumber, locale)
             : ""}
         </div>
       </div>
 
       {/* Row 4: Sessions / Credits */}
-      <div style={twoColGrid}>
-        <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>講義回数</div>
-          <div style={fieldValueStyle}>{sessionCount}回</div>
+      <div style={fieldGroupStyle}>
+        <div style={fieldLabelStyle}>{t("講義回数")}</div>
+        <div style={fieldValueStyle}>
+          {t("{count}回", { count: sessionCount })}
         </div>
-        <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>単位数</div>
-          <div style={fieldValueStyle}>{credits}単位</div>
+      </div>
+      <div style={fieldGroupStyle}>
+        <div style={fieldLabelStyle}>{t("単位")}</div>
+        <div style={fieldValueStyle}>
+          {t("{credits}単位", { credits })}
         </div>
       </div>
 
       {/* Row 5: Overview */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>講義概要</div>
+        <div style={fieldLabelStyle}>{t("講義概要")}</div>
         <div style={fieldValueStyle}>{data.overview}</div>
       </div>
 
       {/* Row 6: Goals */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>受講者の到達目標</div>
+        <div style={fieldLabelStyle}>{t("受講者の到達目標")}</div>
         {data.goals
           .filter((g) => g.trim())
           .map((goal, idx) => (
@@ -130,14 +134,14 @@ const CoursePngTemplate = React.forwardRef<
 
       {/* Row 7: Approach */}
       <div style={fieldGroupStyle}>
-        <div style={fieldLabelStyle}>講義の進め方・方針</div>
+        <div style={fieldLabelStyle}>{t("講義の進め方・方針")}</div>
         <div style={fieldValueStyle}>{data.approach}</div>
       </div>
 
       {/* Row 8: References (optional) */}
       {data.references && (
         <div style={fieldGroupStyle}>
-          <div style={fieldLabelStyle}>参考文献など</div>
+          <div style={fieldLabelStyle}>{t("参考文献など")}</div>
           <div style={fieldValueStyle}>{data.references}</div>
         </div>
       )}

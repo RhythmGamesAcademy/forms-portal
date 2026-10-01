@@ -1,5 +1,6 @@
 import type { CourseOfferingType } from "./types";
 import { getTokyoDateParts } from "./japanTime";
+import { translate, type Locale } from "./i18n";
 
 const FIRST_TERM_START_YEAR = 2026;
 const FIRST_TERM_START_MONTH = 8;
@@ -35,12 +36,17 @@ export function getNextAcademicTermBoundary(date: Date): Date {
 
 export function formatOfferingForPng(
   offeringType: CourseOfferingType,
-  termNumber: number
+  termNumber: number,
+  locale: Locale
 ): string {
-  const term = `#${termNumber}期`;
-  return offeringType === "当期講義"
-    ? `${offeringType}（${term}）`
-    : `${offeringType}（${term}から）`;
+  const template =
+    offeringType === "当期講義"
+      ? "{offering}（#{term}期）"
+      : "{offering}（#{term}期から）";
+  return translate(template, locale, {
+    offering: translate(offeringType, locale),
+    term: termNumber,
+  });
 }
 
 function tokyoMidnight(year: number, month: number): Date {
