@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLocale } from "@/lib/i18n";
 
 interface SelectInputProps {
   id: string;
@@ -19,18 +20,19 @@ export default function SelectInput({
   value,
   onChange,
   options,
-  placeholder = "選択してください",
+  placeholder,
   required = false,
   disabled = false,
 }: SelectInputProps) {
+  const { t } = useLocale();
   return (
     <div className="animate-fade-in">
       <label htmlFor={id} className="form-label">
         {label}
         {required ? (
-          <span className="badge-required">必須</span>
+          <span className="badge-required">{t("必須")}</span>
         ) : (
-          <span className="badge-optional">任意</span>
+          <span className="badge-optional">{t("任意")}</span>
         )}
       </label>
       <select
@@ -42,11 +44,11 @@ export default function SelectInput({
         aria-required={required}
       >
         <option value="" disabled>
-          {placeholder}
+          {placeholder ?? t("選択してください")}
         </option>
         {options.map((opt) => (
           <option key={opt} value={opt}>
-            {opt}
+            {t(opt)}
           </option>
         ))}
       </select>

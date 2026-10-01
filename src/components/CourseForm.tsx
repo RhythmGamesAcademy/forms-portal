@@ -42,8 +42,10 @@ import {
   writeLocalDraft,
 } from "@/lib/localDraft";
 import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
+import { getLocalizedCharacterLimit, useLocale } from "@/lib/i18n";
 
 export default function CourseForm() {
+  const { locale, t } = useLocale();
   const [formData, setFormData] = useState<CourseFormData>(createEmptyCourseForm());
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentTerm, setCurrentTerm] = useState<number | null>(null);
@@ -150,6 +152,14 @@ export default function CourseForm() {
   const sessionCountNum = typeof formData.sessionCount === "number" ? formData.sessionCount : 0;
   const isSessionValid = sessionCountNum >= SESSION_MIN && sessionCountNum <= SESSION_MAX;
   const credits = calculateCredits(sessionCountNum);
+  const characterLimits = React.useMemo(() => ({
+    subjectName: getLocalizedCharacterLimit(CHAR_LIMITS.subjectName, locale),
+    instructorName: getLocalizedCharacterLimit(CHAR_LIMITS.instructorName, locale),
+    overview: getLocalizedCharacterLimit(CHAR_LIMITS.overview, locale),
+    goal: getLocalizedCharacterLimit(CHAR_LIMITS.goal, locale),
+    approach: getLocalizedCharacterLimit(CHAR_LIMITS.approach, locale),
+    reference: getLocalizedCharacterLimit(CHAR_LIMITS.reference, locale),
+  }), [locale]);
 
   // Validation: check if form is valid and generation button should be enabled
   const isFormValid = React.useMemo(() => {
@@ -170,23 +180,23 @@ export default function CourseForm() {
 
     const hasRequiredFields =
       subjectName.trim() !== "" &&
-      subjectName.length <= CHAR_LIMITS.subjectName &&
+      subjectName.length <= characterLimits.subjectName &&
       instructorName.trim() !== "" &&
-      instructorName.length <= CHAR_LIMITS.instructorName &&
+      instructorName.length <= characterLimits.instructorName &&
       department !== "" &&
       courseCategory !== "" &&
       offeringType !== "" &&
       isSessionValid &&
       overview.trim() !== "" &&
-      overview.length <= CHAR_LIMITS.overview &&
+      overview.length <= characterLimits.overview &&
       approach.trim() !== "" &&
-      approach.length <= CHAR_LIMITS.approach &&
-      (references === "" || references.length <= CHAR_LIMITS.reference);
+      approach.length <= characterLimits.approach &&
+      (references === "" || references.length <= characterLimits.reference);
 
     const hasValidGoals =
       goals.length > 0 &&
       goals.some((g) => g.trim() !== "") &&
-      goals.filter(g => g.trim() !== "").every((g) => g.length <= CHAR_LIMITS.goal);
+      goals.filter(g => g.trim() !== "").every((g) => g.length <= characterLimits.goal);
 
     return (
       hasRequiredFields &&
@@ -195,7 +205,7 @@ export default function CourseForm() {
       confirmPrivacyPolicy &&
       confirmRegulations
     );
-  }, [formData, isSessionValid]);
+  }, [formData, isSessionValid, characterLimits]);
 
   const handleSaveDraft = () => {
     hasUserEditedRef.current = true;
@@ -260,13 +270,14 @@ export default function CourseForm() {
         setIsGenerating(true);
       });
 
-      const filename = `講義開講申請書_${sanitizeFilename(
-        formData.subjectName
+      const filename = `${sanitizeFilename(t("講義開講申請書"))}_${sanitizeFilename(
+        formData.subjectName,
+        t("無題")
       )}_${formatDateForFilename(generatedAt)}.png`;
       await generatePng(templateRef.current, filename);
     } catch (err) {
       console.error("PNG generation error:", err);
-      alert("PNGの生成に失敗しました。もう一度お試しください。");
+      alert(t("PNGの生成に失敗しました。もう一度お試しください。"));
     } finally {
       flushSync(() => {
         setPngSnapshot(null);
@@ -282,27 +293,27 @@ export default function CourseForm() {
   return (
     <div>
       <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-        <SectionHeading divider={false}>講義基本情報</SectionHeading>
+        <SectionHeading divider={false}>{t("講義基本情報")}</SectionHeading>
 
         {/* Subject Name & Instructor Name */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextInput
             id="course-subject"
-            label="科目名"
+            label={t("科目名")}
             value={formData.subjectName}
             onChange={(val) => updateField("subjectName", val)}
-            placeholder={PLACEHOLDERS.course.subjectName}
+            placeholder={t(PLACEHOLDERS.course.subjectName)}
             required
-            maxLength={CHAR_LIMITS.subjectName}
+            maxLength={characterLimits.subjectName}
           />
           <TextInput
             id="course-instructor"
-            label="担当講師"
+            label={t("担当講師")}
             value={formData.instructorName}
             onChange={(val) => updateField("instructorName", val)}
-            placeholder={PLACEHOLDERS.course.instructorName}
+            placeholder={t(PLACEHOLDERS.course.instructorName)}
             required
-            maxLength={CHAR_LIMITS.instructorName}
+            maxLength={characterLimits.instructorName}
           />
         </div>
 
@@ -310,7 +321,7 @@ export default function CourseForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SelectInput
             id="course-department"
-            label="対象学部"
+            label={t("対象学部")}
             value={formData.department}
             onChange={handleDepartmentChange}
             options={DEPARTMENTS}
@@ -318,24 +329,24 @@ export default function CourseForm() {
           />
           <SelectInput
             id="course-category"
-            label="講義区分"
+            label={t("講義区分")}
             value={formData.courseCategory}
             onChange={(val) => updateField("courseCategory", val)}
             options={availableCategories}
             placeholder={
-              formData.department ? "選択してください" : "先に対象学部を選択してください"
+              formData.department ? t("選択してください") : t("先に対象学部を選択してください")
             }
             required
             disabled={!formData.department}
           />
         </div>
 
-        <SectionHeading>開講条件</SectionHeading>
+        <SectionHeading>{t("開講条件")}</SectionHeading>
 
         <div className="max-w-xl">
           <SelectInput
             id="course-offering-type"
-            label="開講時期"
+            label={t("開講時期")}
             value={formData.offeringType}
             onChange={(val) =>
               updateField("offeringType", val as CourseFormData["offeringType"])
@@ -346,11 +357,17 @@ export default function CourseForm() {
           <p className="mt-2 text-sm text-[var(--color-text-muted)]" aria-live="polite">
             {currentTerm === null
               ? formData.offeringType
-                ? `選択結果: ${formData.offeringType}（対象期は2026年8月1日以降に確定）`
-                : "対象期は2026年8月1日以降に表示されます。"
+                ? t("選択結果: {offering}（対象期は2026年8月1日以降に確定）", {
+                    offering: t(formData.offeringType),
+                  })
+                : t("対象期は2026年8月1日以降に表示されます。")
               : formData.offeringType
-                ? `PNGへの印字: ${formatOfferingForPng(formData.offeringType, currentTerm)}`
-                : `対象期: #${currentTerm}期（開講時期を選択するとPNGへの印字を確認できます）`}
+                ? t("PNGへの印字: {value}", {
+                    value: formatOfferingForPng(formData.offeringType, currentTerm, locale),
+                  })
+                : t("対象期: #{term}期（開講時期を選択するとPNGへの印字を確認できます）", {
+                    term: currentTerm,
+                  })}
           </p>
         </div>
 
@@ -359,82 +376,82 @@ export default function CourseForm() {
           <div>
             <TextInput
               id="course-sessions"
-              label="講義回数 (3〜15回)"
+              label={t("講義回数 (3〜15回)")}
               type="number"
               value={formData.sessionCount === "" ? "" : String(formData.sessionCount)}
               onChange={handleSessionChange}
-              placeholder={PLACEHOLDERS.course.sessionCount}
+              placeholder={t(PLACEHOLDERS.course.sessionCount)}
               required
               min={SESSION_MIN}
               max={SESSION_MAX}
             />
             {formData.sessionCount !== "" && !isSessionValid && (
               <p className="text-xs text-[var(--color-error)] mt-1">
-                講義回数は {SESSION_MIN}〜{SESSION_MAX} 回の範囲で入力してください
+                {t("講義回数は半角数字で 3〜15 回の範囲で入力してください")}
               </p>
             )}
           </div>
           <div>
             <label className="form-label">
-              単位数
-              <span className="badge-auto">自動算出</span>
+              {t("単位数")}
+              <span className="badge-auto">{t("自動算出")}</span>
             </label>
             <div className="auto-value">
-              {isSessionValid ? `${credits} 単位` : "- 単位"}
+              {t("{credits} 単位", { credits: isSessionValid ? credits : "-" })}
               <span className="text-xs text-[var(--color-text-muted)] font-normal ml-2">
-                (3〜5回:1 / 6〜10回:2 / 11〜15回:3)
+                {t("(3〜5回:1 / 6〜10回:2 / 11〜15回:3)")}
               </span>
             </div>
           </div>
         </div>
 
-        <SectionHeading>講義内容</SectionHeading>
+        <SectionHeading>{t("講義内容")}</SectionHeading>
 
         {/* Course Overview */}
         <TextArea
           id="course-overview"
-          label="講義概要"
+          label={t("講義概要")}
           value={formData.overview}
           onChange={(val) => updateField("overview", val)}
-          placeholder={PLACEHOLDERS.course.overview}
+          placeholder={t(PLACEHOLDERS.course.overview)}
           required
-          maxLength={CHAR_LIMITS.overview}
+          maxLength={characterLimits.overview}
         />
 
         {/* Goals */}
         <ListInput
           id="course-goals"
-          label="受講者の到達目標"
+          label={t("受講者の到達目標")}
           items={formData.goals}
           onChange={(items) => updateField("goals", items)}
-          placeholder={PLACEHOLDERS.course.goal}
+          placeholder={t(PLACEHOLDERS.course.goal)}
           required
-          maxLength={CHAR_LIMITS.goal}
+          maxLength={characterLimits.goal}
           maxItems={MAX_GOAL_ITEMS}
         />
 
         {/* Approach / Policy */}
         <TextArea
           id="course-approach"
-          label="講義の進め方・方針"
+          label={t("講義の進め方・方針")}
           value={formData.approach}
           onChange={(val) => updateField("approach", val)}
-          placeholder={PLACEHOLDERS.course.approach}
+          placeholder={t(PLACEHOLDERS.course.approach)}
           required
-          maxLength={CHAR_LIMITS.approach}
+          maxLength={characterLimits.approach}
         />
 
         {/* References (optional) */}
         <TextArea
           id="course-references"
-          label="参考文献など"
+          label={t("参考文献など")}
           value={formData.references}
           onChange={(val) => updateField("references", val)}
-          placeholder={PLACEHOLDERS.course.references}
-          maxLength={CHAR_LIMITS.reference}
+          placeholder={t(PLACEHOLDERS.course.references)}
+          maxLength={characterLimits.reference}
         />
 
-        <SectionHeading>確認・同意</SectionHeading>
+        <SectionHeading>{t("確認・同意")}</SectionHeading>
 
         <AgreementSection
           confirmNoFalsehood={formData.confirmNoFalsehood}
@@ -446,8 +463,8 @@ export default function CourseForm() {
               checkboxId: "confirm-privacy-course",
               checked: formData.confirmPrivacyPolicy,
               markdownPath: "/privacy-policy.md",
-              title: "プライバシーポリシー",
-              label: "に同意します",
+              title: t("プライバシーポリシー"),
+              label: t("に同意します"),
               field: "confirmPrivacyPolicy",
             },
             {
@@ -455,8 +472,8 @@ export default function CourseForm() {
               checkboxId: "confirm-regulations-course",
               checked: formData.confirmRegulations,
               markdownPath: "/lecturer-policy.md",
-              title: "講師規約",
-              label: "に同意し、遵守することを誓います",
+              title: t("講師ガイドライン"),
+              label: t("に同意し、遵守することを誓います"),
               field: "confirmRegulations",
             },
           ]}
@@ -486,10 +503,10 @@ export default function CourseForm() {
             {isGenerating ? (
               <>
                 <span className="spinner" />
-                <span>PNG生成中...</span>
+                <span>{t("PNG生成中...")}</span>
               </>
             ) : (
-              <span>申請書PNGをダウンロード</span>
+              <span>{t("申請書PNGをダウンロード")}</span>
             )}
           </button>
         </div>

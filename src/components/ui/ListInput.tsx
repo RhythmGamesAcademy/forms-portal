@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLocale } from "@/lib/i18n";
 
 interface ListInputProps {
   id: string;
@@ -25,6 +26,7 @@ export default function ListInput({
   maxLength,
   maxItems,
 }: ListInputProps) {
+  const { t } = useLocale();
   const canAdd = items.length < maxItems;
   const [focusedIndex, setFocusedIndex] = React.useState<number | null>(null);
 
@@ -52,9 +54,9 @@ export default function ListInput({
       <legend className="form-legend">
         {label}
         {required ? (
-          <span className="badge-required">必須</span>
+          <span className="badge-required">{t("必須")}</span>
         ) : (
-          <span className="badge-optional">任意</span>
+          <span className="badge-optional">{t("任意")}</span>
         )}
       </legend>
 
@@ -89,7 +91,7 @@ export default function ListInput({
                     type="button"
                     className="btn-remove"
                     onClick={() => handleRemove(index)}
-                    aria-label={`${index + 1}番目を削除`}
+                    aria-label={t("{index}番目を削除", { index: index + 1 })}
                   >
                     x
                   </button>
@@ -103,8 +105,8 @@ export default function ListInput({
                     aria-live="polite"
                   >
                     {isOverLimit
-                      ? `${charCount - maxLength}文字超過しています`
-                      : isAtLimit && "上限に達しました"}
+                      ? `${charCount - maxLength}${t("文字超過しています")}`
+                      : isAtLimit && t("上限に達しました")}
                   </div>
                   <div id={`${id}-${index}-counter`} className={`char-counter !mt-0 ${isOverLimit ? "over-limit" : ""}`}>
                     {charCount} / {maxLength}
@@ -122,7 +124,7 @@ export default function ListInput({
         onClick={handleAdd}
         disabled={!canAdd}
       >
-        + 項目を追加
+        + {t("項目を追加")}
         <span className="list-add-count">
           ({items.length}/{maxItems})
         </span>

@@ -32,8 +32,10 @@ import {
   writeLocalDraft,
 } from "@/lib/localDraft";
 import { usePolicyAgreement } from "@/lib/usePolicyAgreement";
+import { getLocalizedCharacterLimit, useLocale } from "@/lib/i18n";
 
 export default function InstructorForm() {
+  const { locale, t } = useLocale();
   const [formData, setFormData] = useState<InstructorFormData>(createEmptyInstructorForm());
   const [isGenerating, setIsGenerating] = useState(false);
   const [draftNotice, setDraftNotice] = useState<DraftNotice | null>(null);
@@ -146,6 +148,14 @@ export default function InstructorForm() {
     );
   };
 
+  const characterLimits = React.useMemo(() => ({
+    name: getLocalizedCharacterLimit(CHAR_LIMITS.name, locale),
+    field: getLocalizedCharacterLimit(CHAR_LIMITS.field, locale),
+    fieldReason: getLocalizedCharacterLimit(CHAR_LIMITS.fieldReason, locale),
+    achievement: getLocalizedCharacterLimit(CHAR_LIMITS.achievement, locale),
+    selfAppeal: getLocalizedCharacterLimit(CHAR_LIMITS.selfAppeal, locale),
+  }), [locale]);
+
   // Validation: check if form is valid and generation button should be enabled
   const isFormValid = React.useMemo(() => {
     const {
@@ -166,25 +176,25 @@ export default function InstructorForm() {
 
     const hasRequiredFields =
       name.trim() !== "" &&
-      name.length <= CHAR_LIMITS.name &&
+      name.length <= characterLimits.name &&
       age.trim() !== "" &&
       age.length <= CHAR_LIMITS.age &&
       discordId.trim() !== "" &&
       discordId.length <= CHAR_LIMITS.discordId &&
       (xId === "" || xId.length <= CHAR_LIMITS.xId) &&
       field.trim() !== "" &&
-      field.length <= CHAR_LIMITS.field &&
+      field.length <= characterLimits.field &&
       department !== "" &&
       courseCategory !== "" &&
       fieldReason.trim() !== "" &&
-      fieldReason.length <= CHAR_LIMITS.fieldReason &&
+      fieldReason.length <= characterLimits.fieldReason &&
       selfAppeal.trim() !== "" &&
-      selfAppeal.length <= CHAR_LIMITS.selfAppeal;
+      selfAppeal.length <= characterLimits.selfAppeal;
 
     // 実績は任意。未入力でも可だが、入力された項目は文字数制限を満たすこと。
     const hasValidAchievements = achievements
       .filter((a) => a.trim() !== "")
-      .every((a) => a.length <= CHAR_LIMITS.achievement);
+      .every((a) => a.length <= characterLimits.achievement);
 
     return (
       hasRequiredFields &&
@@ -193,7 +203,7 @@ export default function InstructorForm() {
       confirmPrivacyPolicy &&
       confirmRegulations
     );
-  }, [formData]);
+  }, [formData, characterLimits]);
 
   // Handle PNG generation
   const handleGenerate = async () => {
@@ -201,11 +211,11 @@ export default function InstructorForm() {
 
     try {
       setIsGenerating(true);
-      const filename = `講師登録申請書_${sanitizeFilename(formData.name)}_${formatDateForFilename()}.png`;
+      const filename = `${sanitizeFilename(t("講師登録申請書"))}_${sanitizeFilename(formData.name, t("無題"))}_${formatDateForFilename()}.png`;
       await generatePng(templateRef.current, filename);
     } catch (err) {
       console.error("PNG generation error:", err);
-      alert("PNGの生成に失敗しました。もう一度お試しください。");
+      alert(t("PNGの生成に失敗しました。もう一度お試しください。"));
     } finally {
       setIsGenerating(false);
     }
@@ -218,25 +228,25 @@ export default function InstructorForm() {
   return (
     <div>
       <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-        <SectionHeading divider={false}>基本情報</SectionHeading>
+        <SectionHeading divider={false}>{t("基本情報")}</SectionHeading>
 
         {/* Name & Age */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextInput
             id="instructor-name"
-            label="講師名"
+            label={t("講師名")}
             value={formData.name}
             onChange={(val) => updateField("name", val)}
-            placeholder={PLACEHOLDERS.instructor.name}
+            placeholder={t(PLACEHOLDERS.instructor.name)}
             required
-            maxLength={CHAR_LIMITS.name}
+            maxLength={characterLimits.name}
           />
           <TextInput
             id="instructor-age"
-            label="年齢"
+            label={t("年齢")}
             value={formData.age}
             onChange={handleAgeChange}
-            placeholder={PLACEHOLDERS.instructor.age}
+            placeholder={t(PLACEHOLDERS.instructor.age)}
             required
             maxLength={CHAR_LIMITS.age}
             inputMode="numeric"
@@ -251,7 +261,7 @@ export default function InstructorForm() {
             label="Discord ID"
             value={formData.discordId}
             onChange={(val) => updateField("discordId", val)}
-            placeholder={PLACEHOLDERS.instructor.discordId}
+            placeholder={t(PLACEHOLDERS.instructor.discordId)}
             required
             maxLength={CHAR_LIMITS.discordId}
           />
@@ -260,29 +270,29 @@ export default function InstructorForm() {
             label="X ID"
             value={formData.xId}
             onChange={(val) => updateField("xId", val)}
-            placeholder={PLACEHOLDERS.instructor.xId}
+            placeholder={t(PLACEHOLDERS.instructor.xId)}
             maxLength={CHAR_LIMITS.xId}
           />
         </div>
 
-        <SectionHeading>担当領域</SectionHeading>
+        <SectionHeading>{t("担当領域")}</SectionHeading>
 
         {/* Field */}
         <TextInput
           id="instructor-field"
-          label="担当分野"
+          label={t("担当分野")}
           value={formData.field}
           onChange={(val) => updateField("field", val)}
-          placeholder={PLACEHOLDERS.instructor.field}
+          placeholder={t(PLACEHOLDERS.instructor.field)}
           required
-          maxLength={CHAR_LIMITS.field}
+          maxLength={characterLimits.field}
         />
 
         {/* Department & Course Category */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SelectInput
             id="instructor-department"
-            label="担当学部"
+            label={t("担当学部")}
             value={formData.department}
             onChange={handleDepartmentChange}
             options={DEPARTMENTS}
@@ -290,12 +300,12 @@ export default function InstructorForm() {
           />
           <SelectInput
             id="instructor-category"
-            label="講義区分"
+            label={t("講義区分")}
             value={formData.courseCategory}
             onChange={(val) => updateField("courseCategory", val)}
             options={availableCategories}
             placeholder={
-              formData.department ? "選択してください" : "先に担当学部を選択してください"
+              formData.department ? t("選択してください") : t("先に担当学部を選択してください")
             }
             required
             disabled={!formData.department}
@@ -305,39 +315,39 @@ export default function InstructorForm() {
         {/* Reason for Field */}
         <TextArea
           id="instructor-reason"
-          label="担当分野の選定理由"
+          label={t("担当分野の選定理由")}
           value={formData.fieldReason}
           onChange={(val) => updateField("fieldReason", val)}
-          placeholder={PLACEHOLDERS.instructor.fieldReason}
+          placeholder={t(PLACEHOLDERS.instructor.fieldReason)}
           required
-          maxLength={CHAR_LIMITS.fieldReason}
+          maxLength={characterLimits.fieldReason}
         />
 
-        <SectionHeading>実績・自己PR</SectionHeading>
+        <SectionHeading>{t("実績・自己PR")}</SectionHeading>
 
         {/* Achievements */}
         <ListInput
           id="instructor-achievements"
-          label="実績"
+          label={t("実績")}
           items={formData.achievements}
           onChange={(items) => updateField("achievements", items)}
-          placeholder={PLACEHOLDERS.instructor.achievement}
-          maxLength={CHAR_LIMITS.achievement}
+          placeholder={t(PLACEHOLDERS.instructor.achievement)}
+          maxLength={characterLimits.achievement}
           maxItems={MAX_ACHIEVEMENT_ITEMS}
         />
 
         {/* Self Appeal */}
         <TextArea
           id="instructor-appeal"
-          label="自己アピール"
+          label={t("自己アピール")}
           value={formData.selfAppeal}
           onChange={(val) => updateField("selfAppeal", val)}
-          placeholder={PLACEHOLDERS.instructor.selfAppeal}
+          placeholder={t(PLACEHOLDERS.instructor.selfAppeal)}
           required
-          maxLength={CHAR_LIMITS.selfAppeal}
+          maxLength={characterLimits.selfAppeal}
         />
 
-        <SectionHeading>確認・同意</SectionHeading>
+        <SectionHeading>{t("確認・同意")}</SectionHeading>
 
         <AgreementSection
           confirmNoFalsehood={formData.confirmNoFalsehood}
@@ -349,8 +359,8 @@ export default function InstructorForm() {
               checkboxId: "confirm-privacy-inst",
               checked: formData.confirmPrivacyPolicy,
               markdownPath: "/privacy-policy.md",
-              title: "プライバシーポリシー",
-              label: "に同意します",
+              title: t("プライバシーポリシー"),
+              label: t("に同意します"),
               field: "confirmPrivacyPolicy",
             },
             {
@@ -358,8 +368,8 @@ export default function InstructorForm() {
               checkboxId: "confirm-regulations-inst",
               checked: formData.confirmRegulations,
               markdownPath: "/lecturer-policy.md",
-              title: "講師ガイドライン",
-              label: "に同意し、遵守することを誓います",
+              title: t("講師ガイドライン"),
+              label: t("に同意し、遵守することを誓います"),
               field: "confirmRegulations",
             },
           ]}
@@ -389,10 +399,10 @@ export default function InstructorForm() {
             {isGenerating ? (
               <>
                 <span className="spinner" />
-                <span>PNG生成中...</span>
+                <span>{t("PNG生成中...")}</span>
               </>
             ) : (
-              <span>申請書PNGをダウンロード</span>
+              <span>{t("申請書PNGをダウンロード")}</span>
             )}
           </button>
         </div>

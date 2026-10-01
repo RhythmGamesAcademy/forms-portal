@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
+import { useLocale } from "@/lib/i18n";
 
 interface TextAreaProps {
   id: string;
@@ -23,6 +24,7 @@ export default function TextArea({
   maxLength,
   disabled = false,
 }: TextAreaProps) {
+  const { t } = useLocale();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const charCount = value.length;
   // 上限ちょうど (30/30) は有効。超過 (31/30) からエラー表示。
@@ -45,9 +47,9 @@ export default function TextArea({
       <label htmlFor={id} className="form-label">
         {label}
         {required ? (
-          <span className="badge-required">必須</span>
+          <span className="badge-required">{t("必須")}</span>
         ) : (
-          <span className="badge-optional">任意</span>
+          <span className="badge-optional">{t("任意")}</span>
         )}
       </label>
       <textarea
@@ -70,8 +72,8 @@ export default function TextArea({
           aria-live="polite"
         >
           {isOverLimit
-            ? `${charCount - maxLength}文字超過しています`
-            : isAtLimit && "上限に達しました"}
+            ? `${charCount - maxLength}${t("文字超過しています")}`
+            : isAtLimit && t("上限に達しました")}
         </div>
         <div id={`${id}-counter`} className={`char-counter !mt-0 ${isOverLimit ? "over-limit" : ""}`}>
           {charCount} / {maxLength}
