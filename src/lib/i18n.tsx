@@ -31,7 +31,7 @@ const translations: Record<string, Partial<Record<Locale, string>>> = {
   "申請書作成ポータル": { en: "Application Portal" },
   [SITE_TITLE]: { en: "Application Builder | Rhythm Games Academy" },
   [SITE_DESCRIPTION]: {
-    en: "A web app for creating and downloading Rhythm Games Academy lecturer registration and course opening applications in your browser.",
+    en: "Create and download Rhythm Games Academy lecturer registration and course opening applications in your browser.",
   },
   "言語": { en: "Language" },
 
@@ -43,14 +43,14 @@ const translations: Record<string, Partial<Record<Locale, string>>> = {
   "生成後は所定の手続きに従って運営へ提出してください。": {
     en: "After generating the image, submit it to Management using the designated procedure.",
   },
-  "申請種別": { en: "Application type" },
+  "申請種別": { en: "Application Type" },
   "講師登録申請": { en: "Lecturer Registration Application" },
   "講義開講申請": { en: "Course Opening Application" },
 
   // -- Section headings --
   "基本情報": { en: "Basic Information" },
   "担当領域": { en: "Field of Responsibility" },
-  "実績・自己PR": { en: "Experience & Self-Promotion" },
+  "実績・自己PR": { en: "Experience and Self-Promotion" },
   "講義基本情報": { en: "Course Information" },
   "開講条件": { en: "Course Opening Conditions" },
   "講義内容": { en: "Course Content" },
@@ -100,8 +100,8 @@ const translations: Record<string, Partial<Record<Locale, string>>> = {
   "モバイル系": { en: "Mobile" },
   "当期講義": { en: "Current-term Course" },
   "通期講義": { en: "Continuing Course" },
-  "{offering}（#{term}期）": { en: "{offering} (Term #{term})" },
-  "{offering}（#{term}期から）": { en: "{offering} (from Term #{term})" },
+  "{offering}（#{term}期）": { en: "{offering} (Academic Term #{term})" },
+  "{offering}（#{term}期から）": { en: "{offering} (from Academic Term #{term})" },
   "対象期は2026年8月1日以降に表示されます。": {
     en: "The academic term will be shown from August 1, 2026.",
   },
@@ -110,7 +110,7 @@ const translations: Record<string, Partial<Record<Locale, string>>> = {
   },
   "PNGへの印字: {value}": { en: "Printed on PNG: {value}" },
   "対象期: #{term}期（開講時期を選択するとPNGへの印字を確認できます）": {
-    en: "Academic term: #{term} (select a course opening period to preview the PNG)",
+    en: "Academic Term: #{term} (select a course opening period to preview the PNG)",
   },
 
   // -- Generic form UI --
@@ -160,9 +160,9 @@ const translations: Record<string, Partial<Record<Locale, string>>> = {
   },
   "プライバシーポリシー": { en: "Privacy Policy" },
   "講師ガイドライン": { en: "Lecturer guideline" },
-  "に同意します": { en: " — I agree." },
+  "に同意します": { en: " and agree." },
   "に同意し、遵守することを誓います": {
-    en: " — I agree to it and pledge to comply with it.",
+    en: " and agree to it, and pledge to comply with it.",
   },
   "閉じる": { en: "Close" },
   "同意する": { en: "Agree" },
@@ -230,7 +230,7 @@ const faqTranslations: Record<Locale, Record<number, [string, string]>> = {
   en: {
     1: [
       "What should I do after downloading the application PNG?",
-      "You can submit a lecturer registration application from the application channels in the Academic Affairs Officer's room on Discord. Create a dedicated channel there and post the downloaded application image. Your application is considered received once you post it.",
+      "You can submit a Lecturer Registration Application from the application channels in the Deans' room on Discord. Create a dedicated channel there and post the downloaded application image. Your application is considered received once you post it.",
     ],
     2: [
       "How long does the review take?",
@@ -242,42 +242,42 @@ const faqTranslations: Record<Locale, Record<number, [string, string]>> = {
     ],
     4: [
       "Can I teach in faculties other than the one I selected?",
-      "Yes. The selected faculty only indicates your primary area of activity. You may also teach in other faculties, so please select the field that is the center of your activities.",
+      "Yes. The selected faculty indicates your primary area; you may also teach in other faculties.",
     ],
     5: [
       "Where should I apply for PC or console rhythm-game courses?",
-      "Please apply under Standalone courses.",
+      "Select 'Standalone'.",
     ],
     6: [
       "Where should interdisciplinary courses be categorized?",
-      "Please apply under Humanities and Sciences courses in the Rhythm Games Foundations Faculty. Content that spans faculties or is general-education in nature is treated as Humanities and Sciences courses.",
+      "Select 'Humanities and Sciences' in 'Rhythm Games Foundations Faculty'. Content that spans faculties or is general-education in nature is treated as 'Humanities and Sciences' courses.",
     ],
     7: [
       "What should I write under Experience?",
       "List facts that objectively show you are able to teach your field, such as degrees or grades, qualifications, works or portfolios, and community activity history. If you have no notable achievements, use the Self-Promotion field to fully convey your knowledge and experience. Please avoid writing information you do not wish to make public, such as your real name or school name.",
     ],
     8: [
-      "Do I have to open a course every term after registering as a lecturer?",
-      "No. Once approved, your lecturer qualification remains valid. You will not lose it even if you skip a term, so please work at your own pace.",
+      "Do I have to open a course every academic term after registering as a Lecturer?",
+      "No. Once approved, your Lecturer qualification remains valid. You will not lose it even if you skip an academic term, so please work at your own pace.",
     ],
     9: [
-      "Is the information entered in the form stored on a server?",
-      'No, it is not stored on a server. Your input is converted into the application PNG in your browser. If you select "Save Draft", your input (excluding the confirmation and agreement checkboxes) is saved in the browser you are using and restored when you open the form in the same browser. See the Privacy Policy for details.',
+      "Is information entered in the form stored on a server?",
+      "No. It is converted to a PNG in your browser. Drafts are stored only in this browser, excluding agreement checkboxes.",
     ],
     10: [
-      'What is the difference between a "current-term course" and a "continuing course"?',
-      "A current-term course is held and ends in its designated term; to run it again in another term, you submit a new course opening application, as at a typical school. A continuing course can continue to be taken from the designated term without updating the course materials. A continuing course does not mean classes are held every term or that it is available permanently.",
+      "What is the difference between a current-term and continuing course?",
+      "A current-term course ends after its designated term and requires a new submission to run again. A continuing course lets students continue using materials from the designated term; it does not mean classes run every term or remain available forever.",
     ],
     11: [
       "When does the academic term change?",
-      "The term changes on February 1 and August 1, determined by Japan time when the PNG is created. August 1, 2026 through January 31, 2027 is Term #1, and the number advances by one at each change after that. The PNG creation date and time is not the actual date and time you post your application on Discord.",
+      "Terms change on February 1 and August 1, based on Japan time when the PNG is created. The PNG date is not the submission date.",
     ],
     12: [
       "How can I update published course materials?",
-      "Do not edit published course materials into a new version. If the content becomes outdated, please apply again as a new course. You may reuse past materials apart from the parts that need to change. The previous course will no longer be available to take.",
+      "Do not replace published materials with a revised version. Submit a new course if the content becomes outdated; previous materials may be reused where appropriate.",
     ],
     13: [
-      "Is the creation date on the PNG the date I applied on Discord?",
+      "Is the creation date on the PNG the date and time I applied on Discord?",
       "No. The portal records the date and time the PNG was created. It does not capture the actual date and time your application was posted or received, so please check the post date and time on Discord.",
     ],
   },
